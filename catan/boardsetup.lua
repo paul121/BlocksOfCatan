@@ -56,7 +56,55 @@ local generate_board = function()
   return board
 end
 
-local display_tile = function(pos, offset, color)
+local display_number = function (pos, offset, tile)
+  local number, color1, color2
+  if tile.number ~= nil then
+    if tile.number < 7 then
+      color1 = "wool:white"
+      color2 = "wool:black"
+    else
+      color1 = "wool:black"
+      color2 = "wool:white"
+    end
+
+    worldedit.cylinder({x = pos.x + offset.x, y = pos.y + 15, z = pos.z + offset.y}, "y", 1, 4, color1, false)
+    number = tonumber(tile.number)
+    number = number % 6
+
+    if number == 2 then
+      worldedit.set({x = pos.x + offset.x -1, y = pos.y + 15, z = pos.z + offset.y-1}, {x = pos.x + offset.x-1, y = pos.y + 15, z = pos.z + offset.y-1}, color2)
+      worldedit.set({x = pos.x + offset.x +1, y = pos.y + 15, z = pos.z + offset.y+1}, {x = pos.x + offset.x+1, y = pos.y + 15, z = pos.z + offset.y+1}, color2)
+    elseif number == 3 then
+      worldedit.set({x = pos.x + offset.x -2, y = pos.y + 15, z = pos.z + offset.y-2}, {x = pos.x + offset.x-2, y = pos.y + 15, z = pos.z + offset.y-2}, color2)
+      worldedit.set({x = pos.x + offset.x +2, y = pos.y + 15, z = pos.z + offset.y+2}, {x = pos.x + offset.x+2, y = pos.y + 15, z = pos.z + offset.y+2}, color2)
+      worldedit.set({x = pos.x + offset.x , y = pos.y + 15, z = pos.z + offset.y}, {x = pos.x + offset.x, y = pos.y + 15, z = pos.z + offset.y}, color2)
+    elseif number == 4 then
+      worldedit.set({x = pos.x + offset.x -1, y = pos.y + 15, z = pos.z + offset.y-1}, {x = pos.x + offset.x-1, y = pos.y + 15, z = pos.z + offset.y-1}, color2)
+      worldedit.set({x = pos.x + offset.x -1, y = pos.y + 15, z = pos.z + offset.y+1}, {x = pos.x + offset.x-1, y = pos.y + 15, z = pos.z + offset.y+1}, color2)
+      worldedit.set({x = pos.x + offset.x +1, y = pos.y + 15, z = pos.z + offset.y-1}, {x = pos.x + offset.x+1, y = pos.y + 15, z = pos.z + offset.y-1}, color2)
+      worldedit.set({x = pos.x + offset.x +1, y = pos.y + 15, z = pos.z + offset.y+1}, {x = pos.x + offset.x+1, y = pos.y + 15, z = pos.z + offset.y+1}, color2)
+    elseif number == 5 then
+      worldedit.set({x = pos.x + offset.x -2, y = pos.y + 15, z = pos.z + offset.y-2}, {x = pos.x + offset.x-2, y = pos.y + 15, z = pos.z + offset.y-2}, color2)
+      worldedit.set({x = pos.x + offset.x +2, y = pos.y + 15, z = pos.z + offset.y-2}, {x = pos.x + offset.x+2, y = pos.y + 15, z = pos.z + offset.y-2}, color2)
+      worldedit.set({x = pos.x + offset.x -2, y = pos.y + 15, z = pos.z + offset.y+2}, {x = pos.x + offset.x-2, y = pos.y + 15, z = pos.z + offset.y+2}, color2)
+      worldedit.set({x = pos.x + offset.x +2, y = pos.y + 15, z = pos.z + offset.y+2}, {x = pos.x + offset.x+2, y = pos.y + 15, z = pos.z + offset.y+2}, color2)
+      worldedit.set({x = pos.x + offset.x , y = pos.y + 15, z = pos.z + offset.y}, {x = pos.x + offset.x, y = pos.y + 15, z = pos.z + offset.y}, color2)
+    elseif number == 0 then
+      worldedit.set({x = pos.x + offset.x -2, y = pos.y + 15, z = pos.z + offset.y-2}, {x = pos.x + offset.x-2, y = pos.y + 15, z = pos.z + offset.y-2}, color2)
+      worldedit.set({x = pos.x + offset.x +2, y = pos.y + 15, z = pos.z + offset.y-2}, {x = pos.x + offset.x+2, y = pos.y + 15, z = pos.z + offset.y-2}, color2)
+      worldedit.set({x = pos.x + offset.x -2, y = pos.y + 15, z = pos.z + offset.y+2}, {x = pos.x + offset.x-2, y = pos.y + 15, z = pos.z + offset.y+2}, color2)
+      worldedit.set({x = pos.x + offset.x +2, y = pos.y + 15, z = pos.z + offset.y+2}, {x = pos.x + offset.x+2, y = pos.y + 15, z = pos.z + offset.y+2}, color2)
+      worldedit.set({x = pos.x + offset.x -2, y = pos.y + 15, z = pos.z + offset.y}, {x = pos.x + offset.x-2, y = pos.y + 15, z = pos.z + offset.y}, color2)
+      worldedit.set({x = pos.x + offset.x +2, y = pos.y + 15, z = pos.z + offset.y}, {x = pos.x + offset.x+2, y = pos.y + 15, z = pos.z + offset.y}, color2)
+    end
+
+  end
+end
+
+local display_tile = function(tile, pos, offset)
+  local colors = {wheat="yellow", wool="green", wood="brown", ore="blue", brick="red", desert="white"}
+  local color = colors[tile.type]
+
   local x = pos.x + offset.x
   local y = pos.y
   local z = pos.z + offset.y
@@ -127,22 +175,19 @@ local display_tile = function(pos, offset, color)
     worldedit.set({x = pos.x + row_offset.x, y= pos.y, z = pos.z + row_offset.y}, {x = pos.x + row_offset.x, y= pos.y, z = pos.z + row_offset.y}, "wool:"..color)
   end
   --minetest.chat_send_all(x..""..y..""..z)
+
+
+  display_number(pos, offset, tile)
 end
 
 local display_board = function(board)
   local offsets = {{x=-28, y=0}, {x=-21, y=12}, {x=-14, y=24}, {x=0, y=24}, {x=14, y=24}, {x=21, y=12}, {x=28, y=0}, {x=21, y=-12}, {x=14, y=-24}, {x=0, y=-24}, {x=-14, y=-24}, {x=-21, y=-12}, {x=-14, y=0}, {x=-7, y=12}, {x=7, y=12}, {x=14, y=0}, {x=7, y=-12}, {x=-7, y=-12}, {x=0, y=0}}
   local pos = catan_local.boardsettings.pos
+
   for i = 19, 1, -1 do
-    local colors = {wheat="yellow", wool="green", wood="brown", ore="blue", brick="red", desert="white"}
-    local type = board.tiles[i].type
-    local color = colors[type]
     local offset = offsets[i]
-
-
-    display_tile(pos, offset, color)
-
+    display_tile(board.tiles[i], pos, offset)
   end
-
 end
 
 
