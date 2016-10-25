@@ -73,8 +73,8 @@ catan_local.functions.start = function(name)
   minetest.chat_send_all(catan_local.modchatprepend..name .. " started the Catan mod.")
 
   local inv = minetest.get_inventory({type="player", name=name})
-  local stack = ItemStack("catan:board_center 1")
-  local list = { stack }
+  local stack = ItemStack("catan:board_center 2")
+  local list = { stack, ItemStack("catan:road_builder 20") }
 
   inv:set_list("main", list)
   minetest.get_player_by_name(name)
