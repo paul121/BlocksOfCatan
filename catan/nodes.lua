@@ -31,7 +31,7 @@ minetest.register_node("catan:road_default", {
 
 minetest.register_node("catan:road_red", {
 	description = "Red road block",
-	tiles = {"wool_red.png"},
+	tiles = {"default_diamond_block.png"},
 	is_ground_content = true,
 	groups = {crumbly=3}
 })
@@ -40,5 +40,5 @@ minetest.register_node("catan:road_builder", {
 	description = "Road builder block",
 	tiles = {"wool_orange.png"},
 	groups = {crumbly=3},
-	on_punch = function(pos, node, player, pointed_thing) catan_local.functions.roadBuilderDrop(player, pos) end
+	on_punch = function(pos, node, player, pointed_thing) catan_local.functions.roadBuilderPlace(player, pos) end
 })
