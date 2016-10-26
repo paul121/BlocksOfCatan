@@ -1,4 +1,4 @@
-local ChatCmdBuilder = {}
+ChatCmdBuilder = {}
 
 function ChatCmdBuilder.new(name, func, def)
 	def = def or {}
@@ -32,12 +32,12 @@ local function escape(char)
 	end
 end
 
-function ChatCmdBuilder.build(func)
+function ChatCmdBuilder.build(name, func)
 	local cmd = {
 		_subs = {}
 	}
 	function cmd:sub(route, func, def)
-		print("Parsing " .. route)
+		minetest.debug("Parsing " .. route)
 
 		def = def or {}
 		if string.trim then
@@ -56,7 +56,7 @@ function ChatCmdBuilder.build(func)
 		local should_be_eos = false
 		local function finishParam()
 			if param ~= "" and param_type ~= "" then
-				print("   - Found param " .. param .. " type " .. param_type)
+				minetest.debug("   - Found param " .. param .. " type " .. param_type)
 
 				if param_type == "pos" then
 					sub.pattern = sub.pattern .. "%(? *([%d.]+) *, *([%d.]+) *, *([%d.]+) *%)?"
@@ -69,7 +69,7 @@ function ChatCmdBuilder.build(func)
 					sub.pattern = sub.pattern .. "([%d]+)"
 				else
 					if param_type ~= "word" then
-						print("Unrecognised param_type=" .. param_type .. ", using 'word' type instead")
+						minetest.debug("Unrecognised param_type=" .. param_type .. ", using 'word' type instead")
 						param_type = "word"
 					end
 					sub.pattern = sub.pattern .. "([^ ]+)"
@@ -92,7 +92,7 @@ function ChatCmdBuilder.build(func)
 
 			if state == STATE_READY then
 				if c == ":" then
-					print(" - Found :, entering param")
+					minetest.debug(" - Found :, entering param")
 					state = STATE_PARAM
 					param_type = "word"
 				else
@@ -100,11 +100,11 @@ function ChatCmdBuilder.build(func)
 				end
 			elseif state == STATE_PARAM then
 				if c == ":" then
-					print(" - Found :, entering param type")
+					minetest.debug(" - Found :, entering param type")
 					state = STATE_PARAM_TYPE
 					param_type = ""
 				elseif c:match("%W") then
-					print(" - Found nonalphanum, leaving param")
+					minetest.debug(" - Found nonalphanum, leaving param")
 					state = STATE_READY
 					finishParam()
 					sub.pattern = sub.pattern .. escape(c)
@@ -113,7 +113,7 @@ function ChatCmdBuilder.build(func)
 				end
 			elseif state == STATE_PARAM_TYPE then
 				if c:match("%W") then
-					print(" - Found nonalphanum, leaving param type")
+					minetest.debug(" - Found nonalphanum, leaving param type")
 					state = STATE_READY
 					finishParam()
 					sub.pattern = sub.pattern .. escape(c)
@@ -122,28 +122,33 @@ function ChatCmdBuilder.build(func)
 				end
 			end
 		end
-		print(" - End of route")
+		minetest.debug(" - End of route")
 		finishParam()
-		print("Pattern: " .. sub.pattern)
+		minetest.debug("Pattern: " .. sub.pattern)
 
 		table.insert(self._subs, sub)
 	end
 
-	if func then
+
 		func(cmd)
-	end
+
 
 	cmd.run = function(name, param)
-		print("Running <" .. name .. "> CMD " .. param)
+		minetest.debug("Running <" .. name .. "> CMD " .. param.." with "..#cmd._subs.." cmd._subs")
 		for i = 1, #cmd._subs do
 			local sub = cmd._subs[i]
 			local res = { string.match(param, sub.pattern) }
-			if res then
+			minetest.debug("   Testing "..param.." against "..sub.pattern.." got ")
+			if res[1] then
+
 				local pointer = 1
 				local params = { name }
+				minetest.debug("running loop "..#sub.params.." times")
 				for j = 1, #sub.params do
+					minetest.debug("in the loop "..j.." time")
 					local param = sub.params[j]
 					if param == "pos" then
+						minetest.debug("we have a pos")
 						local pos = {
 							x = tonumber(res[pointer]),
 							y = tonumber(res[pointer + 1]),
@@ -152,9 +157,11 @@ function ChatCmdBuilder.build(func)
 						table.insert(params, pos)
 						pointer = pointer + 3
 					elseif param == "number" or param == "int" then
+						minetest.debug("we have a number")
 						table.insert(params, tonumber(res[pointer]))
 						pointer = pointer + 1
 					else
+						minetest.debug("idk what we have")
 						table.insert(params, res[pointer])
 						pointer = pointer + 1
 					end
@@ -162,9 +169,9 @@ function ChatCmdBuilder.build(func)
 				return sub.func(unpack(params))
 			end
 		end
-		print("No matches")
+		minetest.debug("No matches")
 	end
-	
+
 	return cmd
 end
 

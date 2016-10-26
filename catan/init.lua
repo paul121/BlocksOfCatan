@@ -6,18 +6,8 @@ catan_local.ysize = 20
 catan_local.zsize = 80
 
 catan_local.functions = {}
-catan_local.boardsettings = {}
-catan_local.game_settings = {}
-catan_local.game_settings.game_type = "default"
-catan_local.game_settings.board_layout = "random"
-catan_local.game_settings.board_style = "flat"
-catan_local.game_settings.number_layout = "random"
-
-
-
 
 local modpath = minetest.get_modpath(minetest.get_current_modname())
-
 
 minetest.log("info", "Catan for minetest is starting up.")
 minetest.debug("Catan for Minetest is starting up.")
@@ -39,6 +29,8 @@ loadmodule(worldeditpath .. "/visualization.lua")
 loadmodule(worldeditpath .. "/serialization.lua")
 loadmodule(worldeditpath .. "/code.lua")
 loadmodule(worldeditpath .. "/compatibility.lua")
+
+dofile(modpath.."/chatcmdbuilder/chatcmdbuilder.lua")
 
 assert(loadfile(minetest.get_modpath(minetest.get_current_modname()) .. "/nodes.lua"))(catan_local)
 assert(loadfile(minetest.get_modpath(minetest.get_current_modname()) .. "/commands.lua"))(catan_local)

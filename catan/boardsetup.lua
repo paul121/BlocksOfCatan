@@ -2,8 +2,78 @@ local catan_local = ...
 local xsize = catan_local.xsize;
 local ysize = catan_local.ysize;
 local zsize = catan_local.zsize;
+catan_local.boardsettings = {}
+catan_local.boardsettings.game_type = "default"
+catan_local.boardsettings.layout = "random"
+catan_local.boardsettings.style = "flat"
+catan_local.boardsettings.number_layout = "random"
+catan_local.boardsettings.status = "bare"
 
+getBoardPos = function()
+  local pos = catan_local.boardsettings.pos
+  if pos then
+    return pos
+  else return nil end
+end
 
+setBoardPos = function(pos)
+  local status = getBoardStatus()
+  if status == "bare" then
+    catan_local.boardsettings.pos = pos
+  elseif status == "preview" then
+    return "Board is currently in preview state. '/catan unpreivew' to set new pos."
+  else
+    return "Board is not in state to set pos."
+  end
+
+end
+
+getBoardStatus = function()
+  local status = catan_local.boardsettings.status
+  if status then
+    return status
+  else return nil end
+end
+
+setBoardStatus = function(status)
+  catan_local.boardsettings.status = status
+end
+
+setBoardLayout = function(layout)
+  local status = getBoardStatus()
+  if status ~= "created" then
+    catan_local.boardsettings.layout = layout
+  else
+    return "Cannot set board layout, board is already created."
+  end
+end
+
+setBoardStyle = function(style)
+  local status = getBoardStatus()
+  if status ~= "created" then
+    catan_local.boardsettings.style = style
+  else
+    return "Cannot set board style, board is already created."
+  end
+end
+
+setBoardNumberLayout = function(layout)
+  local status = getBoardStatus()
+  if status ~= "created" then
+    catan_local.boardsettings.number_layout = layout
+  else
+    return "Cannot set board number layout, board is already created."
+  end
+end
+
+setBoardGametype = function(type)
+  local status = getBoardStatus()
+  if status ~= "created" then
+      catan_local.boardsettings.game_type = type
+  else
+    return "Cannot set board gametype, board is already created."
+  end
+end
 
 catan_local.boardsettings.preview = false
 catan_local.boardsettings.created = false
@@ -80,7 +150,7 @@ local display_tile = function(tile, pos)
   worldedit.set(posOffset(3, 0, -5, pos), posOffset(3, 0, 5, pos), "wool:"..color)
   worldedit.set(posOffset(4, 0, -4, pos), posOffset(5, 0, 4, pos), "wool:"..color)
   worldedit.set(posOffset(6, 0, -3, pos), posOffset(6, 0, 3, pos), "wool:"..color)
-  
+
 end
 
 local display_number = function (tile, pos)
@@ -170,17 +240,12 @@ end
 
 
 catan_local.functions.setboardpos = function(pos)
-  if isBoardPreview() then
-    catan_local.functions.unpreviewboardarea()
-  end
-  minetest.chat_send_all(catan_local.modchatprepend.."Center of board set to: "..minetest.pos_to_string(pos))
-  catan_local.boardsettings.pos = pos
+  setBoardPos(pos)
 
 end
 
 catan_local.functions.removeboardpos = function()
-  minetest.chat_send_all(catan_local.modchatprepend.."Removing the board center position.")
-  catan_local.boardsettings.pos = nil
+  setBoardPos()
 end
 
 catan_local.functions.previewboardarea = function()
@@ -191,6 +256,7 @@ catan_local.functions.previewboardarea = function()
     minetest.chat_send_all(catan_local.modchatprepend.."If you like the area, use command '/c:board'")
     worldedit.hide({x=pos.x - xsize/2, y=pos.y + 1, z=pos.z - zsize/2}, {x=pos.x + xsize/2, y=pos.y + ysize, z=pos.z+zsize/2})
     catan_local.boardsettings.preview = true
+    setBoardStatus("preview")
   else
     minetest.chat_send_all(catan_local.modchatprepend.."ERROR: Cannot prieview the board area -- no pos is set. Set the position by placing the special block or command '/c:board-setpos' to set to current position.")
   end
@@ -203,24 +269,31 @@ catan_local.functions.unpreviewboardarea = function()
     minetest.chat_send_all(catan_local.modchatprepend.."Unpreviewing the board area.")
     worldedit.restore({x=pos.x - xsize/2 , y=pos.y + 1, z=pos.z - zsize/2}, {x=pos.x + xsize/2, y=pos.y + ysize, z=pos.z+zsize/2})
     catan_local.boardsettings.preview = false
+    setBoardStatus("bare")
   else
     minetest.chat_send_all(catan_local.modchatprepend.."ERROR: Cannot unprieview the board area -- no pos is set or there is no board in preview.")
   end
 end
 
 catan_local.functions.makeboard = function()
-  if catan_local.boardsettings.pos and not isBoardCreated() then
-    local pos = catan_local.boardsettings.pos
-    minetest.debug("Creating bord, clearing objects")
-    minetest.chat_send_all(catan_local.modchatprepend.."Making board...please wait.")
-    worldedit.restore({x=pos.x - xsize/2 , y=pos.y + 1, z=pos.z - zsize/2}, {x=pos.x + xsize/2, y=pos.y + ysize, z=pos.z+zsize/2})
-    worldedit.set({x=pos.x - xsize/2 , y=pos.y, z=pos.z - zsize/2}, {x=pos.x + xsize/2, y=pos.y + ysize, z=pos.z+zsize/2}, "air")
+  local status = getBoardStatus()
+  local pos = getBoardPos()
+  if status ~= "created" then
+    if pos then
+      minetest.debug("Creating bord, clearing objects")
+      minetest.chat_send_all(catan_local.modchatprepend.."Making board...please wait.")
+      worldedit.restore({x=pos.x - xsize/2 , y=pos.y + 1, z=pos.z - zsize/2}, {x=pos.x + xsize/2, y=pos.y + ysize, z=pos.z+zsize/2})
+      worldedit.set({x=pos.x - xsize/2 , y=pos.y, z=pos.z - zsize/2}, {x=pos.x + xsize/2, y=pos.y + ysize, z=pos.z+zsize/2}, "air")
 
-    worldedit.set({x=pos.x - xsize/2 , y=pos.y-1, z=pos.z - zsize/2}, {x=pos.x + xsize/2, y=pos.y, z=pos.z+zsize/2}, "default:stone")
-    --worldedit.set({x=pos.x, y=pos.y, z=pos.z}, {x=pos.x, y=pos.y + 5, z=pos.z}, "wool:blue")
-    local board = generate_board()
-    display_board(board)
+      worldedit.set({x=pos.x - xsize/2 , y=pos.y-1, z=pos.z - zsize/2}, {x=pos.x + xsize/2, y=pos.y, z=pos.z+zsize/2}, "default:stone")
+      --worldedit.set({x=pos.x, y=pos.y, z=pos.z}, {x=pos.x, y=pos.y + 5, z=pos.z}, "wool:blue")
+      local board = generate_board()
+      display_board(board)
+      setBoardStatus("created")
+    else
+      return "Cannot create board. Set to current pos with '/board set pos' "
+    end
   else
-    minetest.chat_send_all(catan_local.modchatprepend.."ERROR: Cannot make board. Please set and a preview a board position by placing the special block or by using command '/c:board-setpos'")
+    return "Cannot create board, board is already created."
   end
 end
