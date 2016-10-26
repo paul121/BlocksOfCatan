@@ -40,5 +40,5 @@ minetest.register_node("catan:road_builder", {
 	description = "Road builder block",
 	tiles = {"wool_orange.png"},
 	groups = {crumbly=3},
-	on_punch = function(pos, node, player, pointed_thing) catan_local.functions.roadBuilderPlace(player, pos) end
+	after_place_node = function(pos, player, itemstack, pointed_thing) catan_local.functions.roadBuilderPlace(player, pos) end
 })

@@ -46,7 +46,10 @@ local isRoadLocation = function(pos)
   local centerPos = catan_local.boardsettings.pos
   local differenceVector = {x = centerPos.x - pos.x, y = centerPos.y - pos.y, z = centerPos.z - pos.z}
   minetest.chat_send_all("Checking if pos is a road...")
-  if (differenceVector.z % 8 == 0) then
+  if ((differenceVector.z % 8 == 0) and ((differenceVector.x % 14 == 1) or (differenceVector.x % 14 == 13))) or
+     ((differenceVector.z % 4 == 0) and ((differenceVector.x % 7 == 1) or (differenceVector.x % 7 == 6))) or
+     ((differenceVector.z % 3 == 0) and (differenceVector.x % 7 == 0)) then
+
     minetest.chat_send_all("Node placed on correct space!")
     return true
   else
