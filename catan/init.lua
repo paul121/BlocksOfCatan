@@ -1,11 +1,20 @@
 local catan_local = {}
+catan_local.modchatprepend = "CatanMod: "
+
 catan_local.xsize = 86
 catan_local.ysize = 20
 catan_local.zsize = 80
+
 catan_local.functions = {}
 catan_local.boardsettings = {}
-catan_local.teststring = "here is a test"
-catan_local.modchatprepend = "CatanMod: "
+catan_local.game_settings = {}
+catan_local.game_settings.game_type = "default"
+catan_local.game_settings.board_layout = "random"
+catan_local.game_settings.board_style = "flat"
+catan_local.game_settings.number_layout = "random"
+
+
+
 
 local modpath = minetest.get_modpath(minetest.get_current_modname())
 

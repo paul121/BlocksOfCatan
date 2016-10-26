@@ -57,7 +57,47 @@ minetest.register_chatcommand("c:board-rempos", {
 	end
 })
 
-minetest.register_chatcommand("c:board-create", {
+minetest.register_chatcommand("create board", {
+	privs = {
+		catan_admin = true
+	},
+	func = function(name, param)
+		local player = minetest.get_player_by_name(name)
+		catan_local.functions.makeboard()
+	end
+})
+
+minetest.register_chatcommand("game type", {
+	privs = {
+		catan_admin = true
+	},
+	func = function(name, param)
+		local player = minetest.get_player_by_name(name)
+		catan_local.functions.makeboard()
+	end
+})
+
+minetest.register_chatcommand("board layout", {
+	privs = {
+		catan_admin = true
+	},
+	func = function(name, param)
+		local player = minetest.get_player_by_name(name)
+		catan_local.functions.makeboard()
+	end
+})
+
+minetest.register_chatcommand("number layout", {
+	privs = {
+		catan_admin = true
+	},
+	func = function(name, param)
+		local player = minetest.get_player_by_name(name)
+		catan_local.functions.makeboard()
+	end
+})
+
+minetest.register_chatcommand("board style", {
 	privs = {
 		catan_admin = true
 	},
