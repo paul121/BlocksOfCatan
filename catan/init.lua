@@ -35,3 +35,17 @@ assert(loadfile(minetest.get_modpath(minetest.get_current_modname()) .. "/nodes.
 assert(loadfile(minetest.get_modpath(minetest.get_current_modname()) .. "/commands.lua"))(catan_local)
 assert(loadfile(minetest.get_modpath(minetest.get_current_modname()) .. "/boardsetup.lua"))(catan_local)
 assert(loadfile(minetest.get_modpath(minetest.get_current_modname()) .. "/roads.lua"))(catan_local)
+
+
+posOffset = function(x, y, z, pos)
+  if x == nil then
+    x = 0
+  end
+  if y == nil then
+    y = 0
+  end
+  if z == nil then
+    z = 0
+  end
+  return {x = pos.x + x, y = pos.y + y, z = pos.z + z}
+end

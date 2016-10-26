@@ -69,73 +69,18 @@ local display_tile = function(tile, pos)
   local colors = {wheat="yellow", wool="green", wood="brown", ore="blue", brick="red", desert="white"}
   local color = colors[tile.type]
 
-  --worldedit.set({x = pos.x + offset.x, y= pos.y, z = pos.z }, {x = pos.x + offset.x, y= pos.y, z = pos.z }, "wool:"..color)
-
-  for i = 1, 7 do
-    local row_offset = {x =- 6, y = - 4 + i }
-    worldedit.set({x = pos.x + row_offset.x, y= pos.y, z = pos.z + row_offset.y}, {x = pos.x + row_offset.x, y= pos.y, z = pos.z + row_offset.y}, "wool:"..color)
-  end
-
-  for i = 1, 9 do
-    local row_offset = {x =- 5, y = - 5 + i }
-    worldedit.set({x = pos.x + row_offset.x, y= pos.y, z = pos.z + row_offset.y}, {x = pos.x + row_offset.x, y= pos.y, z = pos.z + row_offset.y}, "wool:"..color)
-  end
-
-  for i = 1, 9 do
-    local row_offset = {x =- 4, y = - 5 + i }
-    worldedit.set({x = pos.x + row_offset.x, y= pos.y, z = pos.z + row_offset.y}, {x = pos.x + row_offset.x, y= pos.y, z = pos.z + row_offset.y}, "wool:"..color)
-  end
-
-  for i = 1, 11 do
-    local row_offset = {x =- 3, y = - 6 + i }
-    worldedit.set({x = pos.x + row_offset.x, y= pos.y, z = pos.z + row_offset.y}, {x = pos.x + row_offset.x, y= pos.y, z = pos.z + row_offset.y}, "wool:"..color)
-  end
-
-  for i = 1, 13 do
-    local row_offset = {x =- 2, y = - 7 + i }
-    worldedit.set({x = pos.x + row_offset.x, y= pos.y, z = pos.z + row_offset.y}, {x = pos.x + row_offset.x, y= pos.y, z = pos.z + row_offset.y}, "wool:"..color)
-  end
-
-  for i = 1, 13 do
-    local row_offset = {x =- 1, y = - 7 + i }
-    worldedit.set({x = pos.x + row_offset.x, y= pos.y, z = pos.z + row_offset.y}, {x = pos.x + row_offset.x, y= pos.y, z = pos.z + row_offset.y}, "wool:"..color)
-  end
----------------------------
-  for i = 1, 15 do
-    local row_offset = {x = 0, y = - 8 + i }
-    worldedit.set({x = pos.x + row_offset.x, y= pos.y, z = pos.z + row_offset.y}, {x = pos.x + row_offset.x, y= pos.y, z = pos.z + row_offset.y}, "wool:"..color)
-  end
----------------------------
-  for i = 1, 13 do
-    local row_offset = {x = 1, y = - 7 + i }
-    worldedit.set({x = pos.x + row_offset.x, y= pos.y, z = pos.z + row_offset.y}, {x = pos.x + row_offset.x, y= pos.y, z = pos.z + row_offset.y}, "wool:"..color)
-  end
-
-  for i = 1, 13 do
-    local row_offset = {x = 2, y = - 7 + i }
-    worldedit.set({x = pos.x + row_offset.x, y= pos.y, z = pos.z + row_offset.y}, {x = pos.x + row_offset.x, y= pos.y, z = pos.z + row_offset.y}, "wool:"..color)
-  end
-
-  for i = 1, 11 do
-    local row_offset = {x = 3, y = - 6 + i }
-    worldedit.set({x = pos.x + row_offset.x, y= pos.y, z = pos.z + row_offset.y}, {x = pos.x + row_offset.x, y= pos.y, z = pos.z + row_offset.y}, "wool:"..color)
-  end
-
-  for i = 1, 9 do
-    local row_offset = {x = 4, y = - 5 + i }
-    worldedit.set({x = pos.x + row_offset.x, y= pos.y, z = pos.z + row_offset.y}, {x = pos.x + row_offset.x, y= pos.y, z = pos.z + row_offset.y}, "wool:"..color)
-  end
-
-  for i = 1, 9 do
-    local row_offset = {x = 5, y = - 5 + i }
-    worldedit.set({x = pos.x + row_offset.x, y= pos.y, z = pos.z + row_offset.y}, {x = pos.x + row_offset.x, y= pos.y, z = pos.z + row_offset.y}, "wool:"..color)
-  end
-
-  for i = 1, 7 do
-    local row_offset = {x = 6, y = - 4 + i }
-    worldedit.set({x = pos.x + row_offset.x, y= pos.y, z = pos.z + row_offset.y}, {x = pos.x + row_offset.x, y= pos.y, z = pos.z + row_offset.y}, "wool:"..color)
-  end
-  --minetest.chat_send_all(x..""..y..""..z)
+  worldedit.set(posOffset(-6, 0, -3, pos), posOffset(-6, 0, 3, pos), "wool:"..color)
+  worldedit.set(posOffset(-5, 0, -4, pos), posOffset(-4, 0, 4, pos), "wool:"..color)
+  worldedit.set(posOffset(-3, 0, -5, pos), posOffset(-3, 0, 5, pos), "wool:"..color)
+  worldedit.set(posOffset(-2, 0, -6, pos), posOffset(-1, 0, 6, pos), "wool:"..color)
+  ----------------------
+  worldedit.set(posOffset(0, 0, -7, pos), posOffset(0, 0, 7, pos), "wool:"..color)
+  ----------------------
+  worldedit.set(posOffset(1, 0, -6, pos), posOffset(2, 0, 6, pos), "wool:"..color)
+  worldedit.set(posOffset(3, 0, -5, pos), posOffset(3, 0, 5, pos), "wool:"..color)
+  worldedit.set(posOffset(4, 0, -4, pos), posOffset(5, 0, 4, pos), "wool:"..color)
+  worldedit.set(posOffset(6, 0, -3, pos), posOffset(6, 0, 3, pos), "wool:"..color)
+  
 end
 
 local display_number = function (tile, pos)
@@ -205,7 +150,7 @@ local display_roads = function(tile, pos)
     local pos2 = offset_corners[i][2]
     worldedit.replace(pos1, pos2, "default:stone", "catan:road_default")
   end
-  
+
 end
 
 local display_board = function(board)

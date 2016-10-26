@@ -1,18 +1,5 @@
 local catan_local = ...
 
-local posOffset = function(x, y, z, pos)
-  if x == nil then
-    x = 0
-  end
-  if y == nil then
-    y = 0
-  end
-  if z == nil then
-    z = 0
-  end
-  return {x = pos.x + x, y = pos.y + y, z = pos.z + z}
-end
-
 local convertToRoad = function(pos)
   worldedit.set(pos, pos, "catan:road_red")
 end
@@ -20,10 +7,8 @@ end
 local nodeIsRoad = function(pos)
   local node = minetest.get_node(pos)
   if node.name == "catan:road_default" then
-    minetest.chat_send_all("We have a road!")
     return true
   else
-    minetest.chat_send_all("We have "..node.name)
     return false
   end
 end
