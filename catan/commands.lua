@@ -121,6 +121,24 @@ end, {
 	}
 })
 
+ChatCmdBuilder.new("catandev", function(cmd)
+
+	cmd:sub("capture :filename", function(name, filename)
+		local error = captureBlockZone(filename)
+		if error then
+			return false, error
+		else
+			return true, "Block zone saved to file "..filename..".txt"
+		end
+	end)
+
+end, {
+	description = "Catan board admin tools",
+	privs = {
+		catan_admin = true
+	}
+})
+
 
 catan_local.functions.start = function(name)
   minetest.debug(name .. " started the Catan mod.")
@@ -128,7 +146,7 @@ catan_local.functions.start = function(name)
 
   local inv = minetest.get_inventory({type="player", name=name})
   local stack = ItemStack("catan:board_center 2")
-  local list = { stack, ItemStack("catan:road_builder 20") }
+  local list = { ItemStack("catan:board_center 2"), ItemStack("catan:road_builder 20"), ItemStack("catan:capture_pos1 1"), ItemStack("catan:capture_pos2 1") }
 
   inv:set_list("main", list)
   minetest.get_player_by_name(name)
