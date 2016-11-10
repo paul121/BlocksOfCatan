@@ -5,7 +5,7 @@ local zsize = catan_local.zsize;
 catan_local.boardsettings = {}
 catan_local.boardsettings.game_type = "default"
 catan_local.boardsettings.layout = "random"
-catan_local.boardsettings.style = "flat"
+catan_local.boardsettings.style = "default"
 catan_local.boardsettings.number_layout = "random"
 catan_local.boardsettings.status = "bare"
 
@@ -120,6 +120,10 @@ setBoardLayout = function(layout)
   end
 end
 
+getBoardLayout = function()
+  return catan_local.boardsettings.layout
+end
+
 setBoardStyle = function(style)
   local status = getBoardStatus()
   if status ~= "created" then
@@ -127,6 +131,10 @@ setBoardStyle = function(style)
   else
     return "Cannot set board style, board is already created."
   end
+ end
+
+getBoardStyle = function()
+  return catan_local.boardsettings.style
 end
 
 setBoardNumberLayout = function(layout)
@@ -138,6 +146,10 @@ setBoardNumberLayout = function(layout)
   end
 end
 
+getBoardNumberLayout = function()
+  return catan_local.boardsettings.number_layout
+end
+
 setBoardGametype = function(type)
   local status = getBoardStatus()
   if status ~= "created" then
@@ -145,6 +157,10 @@ setBoardGametype = function(type)
   else
     return "Cannot set board gametype, board is already created."
   end
+end
+
+getBoardGametype = function()
+  return catan_local.boardsettings.game_type
 end
 
 catan_local.boardsettings.preview = false
@@ -166,36 +182,53 @@ local generate_board = function()
   local board = {}
   board.tiles = {}
   board.harbors = {}
-
+  board.settings = {}
+  
+  --board settings
+  board.settings.layout = getBoardLayout()
+  board.settings.style = getBoardStyle()
+  board.settings.numberLayout = getBoardNumberLayout()
+  board.settings.gametype = getBoardGametype()
+  
+  
+  
   --generate tiles
-  local tile_count = 1
-  local tile_types = {{name="desert", max=1, count=0}, {name="wheat", max=4, count=0}, {name="wool", max=4, count=0}, {name="wood", max=4, count=0}, {name="ore", max=3, count=0}, {name="brick", max=3, count=0}}
+  if board.settings.layout == "random" then
+    local tile_count = 1
+    local tile_types = {{name="desert", max=1, count=0}, {name="wheat", max=4, count=0}, {name="wool", max=4, count=0}, {name="wood", max=4, count=0}, {name="ore", max=3, count=0}, {name="brick", max=3, count=0}}
 
-  while tile_count < 20 do
-    local int = math.random(#tile_types)
-    if tile_types[int].count < tile_types[int].max then
-      board.tiles[tile_count] = {}
-      board.tiles[tile_count].type = tile_types[int].name
-      tile_types[int].count = tile_types[int].count + 1
-      tile_count = tile_count + 1
+    while tile_count < 20 do
+      local int = math.random(#tile_types)
+      if tile_types[int].count < tile_types[int].max then
+        board.tiles[tile_count] = {}
+        board.tiles[tile_count].type = tile_types[int].name
+        tile_types[int].count = tile_types[int].count + 1
+        tile_count = tile_count + 1
+      end
     end
+  else
+    --load layout from file
   end
 
   -- generate numbers
-  tile_count = 1
-  local number_types = {{value=2, max=1, count=0}, {value=3, max=2, count=0}, {value=4, max=2, count=0}, {value=5, max=2, count=0}, {value=6, max=2, count=0}, {value=8, max=2, count=0}, {value=9, max=2, count=0}, {value=10, max=2, count=0}, {value=11, max=2, count=0}, {value=12, max=1, count=0}}
-  while tile_count < 20 do
-    local int = math.random(#number_types)
-    if board.tiles[tile_count].type ~= "desert" then
-      if number_types[int].count < number_types[int].max then
-        board.tiles[tile_count].number = number_types[int].value
-        number_types[int].count = number_types[int].count + 1
+  if board.settings.numberLayout == "random" then
+    tile_count = 1
+    local number_types = {{value=2, max=1, count=0}, {value=3, max=2, count=0}, {value=4, max=2, count=0}, {value=5, max=2, count=0}, {value=6, max=2, count=0}, {value=8, max=2, count=0}, {value=9, max=2, count=0}, {value=10, max=2, count=0}, {value=11, max=2, count=0}, {value=12, max=1, count=0}}
+    while tile_count < 20 do
+      local int = math.random(#number_types)
+      if board.tiles[tile_count].type ~= "desert" then
+        if number_types[int].count < number_types[int].max then
+          board.tiles[tile_count].number = number_types[int].value
+          number_types[int].count = number_types[int].count + 1
+          tile_count = tile_count + 1
+        end
+      else
+        minetest.chat_send_all("found a desert")
         tile_count = tile_count + 1
       end
-    else
-      minetest.chat_send_all("found a desert")
-      tile_count = tile_count + 1
     end
+  else
+    --load numberlayout
   end
 
   --generare harbors
@@ -243,7 +276,7 @@ local display_tile = function(tile, style)
 
 end
 
-local display_number = function (tile)
+local display_number = function (tile, style)
   local pos = tile.tilecenter
   local number, color1, color2
   if tile.number ~= nil then
@@ -308,7 +341,7 @@ local display_settlementLocation = function(tile)
   end
 end
 
-local display_roads = function(tile)
+local display_roads = function(tile, style)
   local pos = tile.tilecenter
   local offset_corners = { {{x = pos.x - 7, y = pos.y, z = pos.z - 3}, {x = pos.x - 7, y = pos.y, z = pos.z + 3}}, {{x = pos.x - 6, y = pos.y, z = pos.z + 4}, {x = pos.x - 1, y = pos.y, z = pos.z + 8}}, {{x = pos.x + 1, y = pos.y, z = pos.z + 8}, {x = pos.x + 6, y = pos.y, z = pos.z + 4}}, {{x = pos.x + 7, y = pos.y, z = pos.z - 3}, {x = pos.x + 7, y = pos.y, z = pos.z + 3}}, {{x = pos.x + 1, y = pos.y, z = pos.z - 8}, {x = pos.x + 6, y = pos.y, z = pos.z - 4}}, {{x = pos.x - 1, y = pos.y, z = pos.z - 8}, {x = pos.x - 6, y = pos.y, z = pos.z -4}} }
 
@@ -373,6 +406,7 @@ local display_harbors = function(board)
 end
 
 local display_board = function(board)
+  local boardStyle = board.settings.style
   local offsets = {{x=-28, y=0}, {x=-21, y=12}, {x=-14, y=24}, {x=0, y=24}, {x=14, y=24}, {x=21, y=12}, {x=28, y=0}, {x=21, y=-12}, {x=14, y=-24}, {x=0, y=-24}, {x=-14, y=-24}, {x=-21, y=-12}, {x=-14, y=0}, {x=-7, y=12}, {x=7, y=12}, {x=14, y=0}, {x=7, y=-12}, {x=-7, y=-12}, {x=0, y=0}}
   local pos = catan_local.boardsettings.pos
 
@@ -380,12 +414,12 @@ local display_board = function(board)
     local offset = offsets[i]
     local tile = board.tiles[i]
     tile.tilecenter = {x = pos.x + offset.x, y = pos.y, z = pos.z + offset.y}
-    display_tile(tile, "default")
-    display_number(tile)
+    display_tile(tile, boardStyle)
+    display_number(tile, boardStyle)
     display_settlementLocation(tile)
-    display_roads(tile)
+    display_roads(tile, boardStyle)
   end
-  display_harbors(board)
+  display_harbors(board, boardStyle)
 end
 
 
