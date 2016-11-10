@@ -27,7 +27,7 @@ end
 --file i/o
 local zoneTypes = {board_layout = "/board_layouts", board_style = "/board_styles", game_type = "/game_types", number_layout = "/number_layouts", exports = "/exports"}
 
-saveBlockZone = function(filename, data, type, name)
+saveBlockZone = function(data, filename, type, name)
   local zoneType = zoneTypes[type]
   if zoneType ~= nil then
     if name then name = "/"..name else name = "" end
@@ -45,7 +45,7 @@ saveBlockZone = function(filename, data, type, name)
   end
 end
 
-loadBlockZone = function(type, name, filename)
+loadBlockZone = function(filename, type, name)
   local zoneType = zoneTypes[type]
   if zoneType ~= nil then
     if name then name = "/"..name end
@@ -70,7 +70,7 @@ captureBlockZone = function(filename)
     local pos1 = posOffset(0, -1, 0, capturePos[1])
     local pos2 = posOffset(0, -1, 0, capturePos[2])
     local data = worldedit.serialize(pos1, pos2)
-    local saved, error = saveBlockZone(filename, data, "exports")
+    local saved, error = saveBlockZone( data, filename, "exports")
     if not saved then
       return error
     end
@@ -183,15 +183,15 @@ local generate_board = function()
   board.tiles = {}
   board.harbors = {}
   board.settings = {}
-  
+
   --board settings
   board.settings.layout = getBoardLayout()
   board.settings.style = getBoardStyle()
   board.settings.numberLayout = getBoardNumberLayout()
   board.settings.gametype = getBoardGametype()
-  
-  
-  
+
+
+
   --generate tiles
   if board.settings.layout == "random" then
     local tile_count = 1
@@ -258,7 +258,7 @@ local display_tile = function(tile, style)
   local color = colors[tile.type]
 
   if style then
-    local data = loadBlockZone("board_style", style, tile.type)
+    local data = loadBlockZone(tile.type, "board_style", style)
     worldedit.deserialize(posOffset(-6, 0, -7, pos), data)
   else
     worldedit.set(posOffset(-6, 0, -3, pos), posOffset(-6, 0, 3, pos), "wool:"..color)
@@ -343,14 +343,17 @@ end
 
 local display_roads = function(tile, style)
   local pos = tile.tilecenter
-  local offset_corners = { {{x = pos.x - 7, y = pos.y, z = pos.z - 3}, {x = pos.x - 7, y = pos.y, z = pos.z + 3}}, {{x = pos.x - 6, y = pos.y, z = pos.z + 4}, {x = pos.x - 1, y = pos.y, z = pos.z + 8}}, {{x = pos.x + 1, y = pos.y, z = pos.z + 8}, {x = pos.x + 6, y = pos.y, z = pos.z + 4}}, {{x = pos.x + 7, y = pos.y, z = pos.z - 3}, {x = pos.x + 7, y = pos.y, z = pos.z + 3}}, {{x = pos.x + 1, y = pos.y, z = pos.z - 8}, {x = pos.x + 6, y = pos.y, z = pos.z - 4}}, {{x = pos.x - 1, y = pos.y, z = pos.z - 8}, {x = pos.x - 6, y = pos.y, z = pos.z -4}} }
-
-  for i = 1, 6 do
-    local pos1 = offset_corners[i][1]
-    local pos2 = offset_corners[i][2]
-    worldedit.replace(pos1, pos2, "default:stone", "catan:road_default")
+  if style then
+    local data = loadBlockZone("road", "board_style", style)
+    worldedit.deserialize(posOffset(-7, 0, -8, pos), data)
+  else
+    local offset_corners = { {{x = pos.x - 7, y = pos.y, z = pos.z - 3}, {x = pos.x - 7, y = pos.y, z = pos.z + 3}}, {{x = pos.x - 6, y = pos.y, z = pos.z + 4}, {x = pos.x - 1, y = pos.y, z = pos.z + 8}}, {{x = pos.x + 1, y = pos.y, z = pos.z + 8}, {x = pos.x + 6, y = pos.y, z = pos.z + 4}}, {{x = pos.x + 7, y = pos.y, z = pos.z - 3}, {x = pos.x + 7, y = pos.y, z = pos.z + 3}}, {{x = pos.x + 1, y = pos.y, z = pos.z - 8}, {x = pos.x + 6, y = pos.y, z = pos.z - 4}}, {{x = pos.x - 1, y = pos.y, z = pos.z - 8}, {x = pos.x - 6, y = pos.y, z = pos.z -4}} }
+    for i = 1, 6 do
+      local pos1 = offset_corners[i][1]
+      local pos2 = offset_corners[i][2]
+      worldedit.replace(pos1, pos2, "default:stone", "catan:road_default")
+    end
   end
-
 end
 
 local setNodeInfoText = function(pos, text)

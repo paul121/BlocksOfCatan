@@ -146,7 +146,7 @@ catan_local.functions.start = function(name)
 
   local inv = minetest.get_inventory({type="player", name=name})
   local stack = ItemStack("catan:board_center 2")
-  local list = { ItemStack("catan:board_center 2"), ItemStack("catan:road_builder 20"), ItemStack("catan:capture_pos1 1"), ItemStack("catan:capture_pos2 1") }
+  local list = { ItemStack("catan:board_center 2"), ItemStack("catan:road_builder 20"), ItemStack("catan:capture_pos1 1"), ItemStack("catan:capture_pos2 1"), ItemStack("catan:road_default 1") }
 
   inv:set_list("main", list)
   minetest.get_player_by_name(name)
