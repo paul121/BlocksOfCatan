@@ -15,6 +15,14 @@ minetest.register_node("catan:board_center", {
   after_dig_node = function(pos, oldnode, oldmetadata, digger) setBoardPos() end
 })
 
+minetest.register_node("catan:board_placeholder", {
+	description = "Block used as a place holder. Replaced after board generation.",
+	tiles = {"wool_red.png"},
+	is_ground_content = true,
+	groups = {crumbly=3}
+
+})
+
 minetest.register_node("catan:capture_pos1", {
 	description = "Block for setting worldedit capture position.",
 	tiles = {"default_diamond_block.png"},

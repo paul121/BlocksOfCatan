@@ -202,6 +202,7 @@ local generate_board = function()
       if tile_types[int].count < tile_types[int].max then
         board.tiles[tile_count] = {}
         board.tiles[tile_count].type = tile_types[int].name
+        board.tiles[tile_count].settlements = {{}, {}, {}, {}, {}, {}}
         tile_types[int].count = tile_types[int].count + 1
         tile_count = tile_count + 1
       end
@@ -242,7 +243,34 @@ local generate_board = function()
       harbor_types[int].count = harbor_types[int].count + 1
       tile_count = tile_count + 1
     end
+  end
+  local harborList = {
+    {blockZone = "harborTop", xOffset = -13, zOffset = -4, tiles = { {tile = 1, settlement = {2}}, {tile = 2, settlement = {1, 6}} } },
+    {blockZone = "harborTopRight", xOffset = -7, zOffset = 5, tiles = { {tile = 3, settlement = {1, 2}} }},
+    {blockZone = "harborBottomRight", xOffset = 0, zOffset = 5, tiles = { {tile = 5, settlement = {1}}, {tile = 4, settlement = {2,3}} }},
+    {blockZone = "harborBottomRight", xOffset = 0, zOffset = 5, tiles = { {tile = 5, settlement = {4}}, {tile = 6, settlement = {2,3}} }},
 
+    {blockZone = "harborBottom", xOffset = 8, zOffset = -4, tiles = { {tile = 7, settlement = {3,4}} }},
+
+    {blockZone = "harborBottomLeft", tile = 8, xOffset = 0, zOffset = -11, tiles = { {tile = 9, settlement = {3}}, {tile = 8, settlement = {4,5}} }},
+    {blockZone = "harborBottomLeft", xOffset = 0, zOffset = -11, tiles = { {tile = 9, settlement = {6}}, {tile = 10, settlement = {4,5}} }},
+    {blockZone = "harborTopLeft", xOffset = -7, zOffset = -11, tiles = { {tile = 11, settlement = {5, 6}} }},
+    {blockZone = "harborTop", xOffset = -13, zOffset = -4, tiles = { {tile = 1, settlement = {5}}, {tile = 12, settlement = {1, 6}} }}
+  }
+    --local harborInfoText = "This settlement is harbor number "..harbor.."!"
+    --local meta = minetest.get_meta(board.tiles[tile].settlements[settlement].pos)
+    --meta:set_string("infotext", harborInfoText)
+  for harbor = 1, #harborList do
+    local harborGen = harborList[harbor]
+    for tile = 1, #harborGen.tiles do
+      local tileNum = harborGen.tiles[tile].tile
+      for settlement = 1, #harborGen.tiles[tile].settlement do
+        board.tiles[tileNum].settlements[settlement].harbor = board.harbors[harbor]
+        if settlement == 2 then
+          board.tiles[tileNum].settlements[settlement].harborGen = harborGen
+        end
+      end
+    end
   end
 
   for i in pairs(board.tiles) do
@@ -324,7 +352,6 @@ end
 
 local display_settlementLocation = function(tile)
   local pos = tile.tilecenter
-  tile.settlements = {}
   local offsets = {{x = pos.x - 7, y = pos.y, z = pos.z + 4}, {x = pos.x, y = pos.y, z = pos.z + 8}, {x = pos.x + 7, y = pos.y, z = pos.z + 4}, {x = pos.x + 7, y = pos.y, z = pos.z - 4}, {x = pos.x, y = pos.y, z = pos.z - 8}, {x = pos.x - 7, y = pos.y, z = pos.z - 4}}
   for i = 1, 6 do
     local pos = offsets[i]
@@ -333,8 +360,6 @@ local display_settlementLocation = function(tile)
       worldedit.set(pos, pos, "catan:settlement_location")
     end
     currentNode = minetest.get_node(pos)
-    tile.settlements[i] = {}
-    tile.settlements[i].harbor = nil
     tile.settlements[i].node = currentNode
     tile.settlements[i].pos = pos
 
@@ -360,52 +385,15 @@ local setNodeInfoText = function(pos, text)
 
 end
 
-local setSettlementHarbor = function(board, tile, settlement, harbor)
-  board.tiles[tile].settlements[settlement].harbor = board.harbors[harbor]
-
-  local harborInfoText = "This settlement is harbor number "..harbor.."!"
-  local meta = minetest.get_meta(board.tiles[tile].settlements[settlement].pos)
-  meta:set_string("infotext", harborInfoText)
-end
-
-local display_harbors = function(board)
-
-  --harbor 1\
-  setSettlementHarbor(board, 2,6,1)
-  setSettlementHarbor(board, 2,1,1)
-
-  --harbor 2
-  setSettlementHarbor(board, 3,1,2)
-  setSettlementHarbor(board, 3,2,2)
-
-  --harbor 3
-  setSettlementHarbor(board, 4,2,3)
-  setSettlementHarbor(board, 4,3,3)
-
-  --harbor 4
-  setSettlementHarbor(board, 6,2,4)
-  setSettlementHarbor(board, 6,3,4)
-
-  --harbor 5
-  setSettlementHarbor(board, 7,3,5)
-  setSettlementHarbor(board, 7,4,5)
-
-  --harbor 6
-  setSettlementHarbor(board, 8,4,6)
-  setSettlementHarbor(board, 8,5,6)
-
-  --harbor 7
-  setSettlementHarbor(board, 10,4,7)
-  setSettlementHarbor(board, 10,5,7)
-
-  --harbor 8
-  setSettlementHarbor(board, 11,5,8)
-  setSettlementHarbor(board, 11,6,8)
-
-  --harbor 9
-  setSettlementHarbor(board, 12,6,9)
-  setSettlementHarbor(board, 12,1,9)
-
+local display_harbors = function(tile, style)
+  local pos = tile.tilecenter
+  for i = 1, #tile.settlements do
+    if tile.settlements[i].harborGen then
+      local harborGen = tile.settlements[i].harborGen
+      local data = loadBlockZone(harborGen.blockZone, "board_style", style)
+      worldedit.deserialize(posOffset(harborGen.xOffset, 0, harborGen.zOffset, pos), data)
+    end
+  end
 end
 
 local display_board = function(board)
@@ -420,9 +408,10 @@ local display_board = function(board)
     display_tile(tile, boardStyle)
     display_number(tile, boardStyle)
     display_settlementLocation(tile)
+    display_harbors(tile, boardStyle)
     display_roads(tile, boardStyle)
   end
-  display_harbors(board, boardStyle)
+
 end
 
 
@@ -472,11 +461,12 @@ catan_local.functions.makeboard = function()
       worldedit.restore({x=pos.x - xsize/2 , y=pos.y + 1, z=pos.z - zsize/2}, {x=pos.x + xsize/2, y=pos.y + ysize, z=pos.z+zsize/2})
       worldedit.set({x=pos.x - xsize/2 , y=pos.y, z=pos.z - zsize/2}, {x=pos.x + xsize/2, y=pos.y + ysize, z=pos.z+zsize/2}, "air")
 
-      worldedit.set({x=pos.x - xsize/2 , y=pos.y-1, z=pos.z - zsize/2}, {x=pos.x + xsize/2, y=pos.y, z=pos.z+zsize/2}, "default:stone")
+      worldedit.set({x=pos.x - xsize/2 , y=pos.y-1, z=pos.z - zsize/2}, {x=pos.x + xsize/2, y=pos.y, z=pos.z+zsize/2}, "catan:board_placeholder")
       --worldedit.set({x=pos.x, y=pos.y, z=pos.z}, {x=pos.x, y=pos.y + 5, z=pos.z}, "wool:blue")
       local board = generate_board()
       display_board(board)
       setBoardStatus("created")
+      worldedit.replace({x=pos.x - xsize/2 , y=pos.y-1, z=pos.z - zsize/2}, {x=pos.x + xsize/2, y=pos.y, z=pos.z+zsize/2}, "catan:board_placeholder", "default:water_source")
     else
       return "Cannot create board. Set to current pos with '/board set pos' "
     end
