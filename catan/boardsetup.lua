@@ -1,76 +1,46 @@
+--
 local catan_local = ...
-local xsize = catan_local.xsize;
-local ysize = catan_local.ysize;
-local zsize = catan_local.zsize;
-catan_local.boardsettings = {}
-catan_local.boardsettings.game_type = "default"
-catan_local.boardsettings.layout = "random"
-catan_local.boardsettings.style = "default"
-catan_local.boardsettings.number_layout = "random"
-catan_local.boardsettings.status = "bare"
+local util = catan_local.util
+local board = catan_local.board
 
-local capturePos = {}
---utilities
-posOffset = function(x, y, z, pos)
-  if x == nil then
-    x = 0
-  end
-  if y == nil then
-    y = 0
-  end
-  if z == nil then
-    z = 0
-  end
-  return {x = pos.x + x, y = pos.y + y, z = pos.z + z}
-end
+--create boardSetup
+catan_local.api.boardSetup = {}
+local boardSetup = catan_local.api.boardSetup
 
---file i/o
-local zoneTypes = {board_layout = "/board_layouts", board_style = "/board_styles", game_type = "/game_types", number_layout = "/number_layouts", exports = "/exports"}
+board.settings = {}
+board.settings.gameType = "default"
+board.settings.layout = "random"
+board.settings.style = "default"
+board.settings.numberLayout = "random"
+board.status = "bare"
+board.pos = nil
 
-saveBlockZone = function(data, filename, type, name)
-  local zoneType = zoneTypes[type]
-  if zoneType ~= nil then
-    if name then name = "/"..name else name = "" end
-    if filename then filename = "/"..filename..".txt" else name = "" end
-    local file = io.open(minetest.get_modpath("catan")..zoneType..name..filename, "w")
-    if file then
-      file:write(data)
-      file:close()
-      return true
-    else
-      return false, "could not open file path to write to"
-    end
-  else
-    return false, "invalid block zone type"
-  end
-end
+board.xSize = 86
+board.ySize = 20
+board.zSize = 80
 
-loadBlockZone = function(filename, type, name)
-  local zoneType = zoneTypes[type]
-  if zoneType ~= nil then
-    if name then name = "/"..name end
-    if filename then filename = "/"..filename..".txt" end
-    local file = io.open(minetest.get_modpath("catan")..zoneType..name..filename, "r")
-    if file then
-      local data = file:read("*all")
-      return data
-    else
-      return false, "could not open file"
-    end
-  end
-end
+local xSize = board.xSize
+local ySize = board.ySize
+local zSize = board.zSize
+
+----------------------------------------------------
+--LOCAL FUNCTIONS
+----------------------------------------------------
 
 --for development, capturing block areas and saving blocks in range to file
-setCapturePos = function(pos, posNum)
+----------------------------------------------------
+local capturePos = {}
+
+local setCapturePos = function(pos, posNum)
   capturePos[posNum] = pos
 end
 
-captureBlockZone = function(filename)
+local captureBlockZone = function(filename)
   if capturePos[1] and capturePos[2] then
-    local pos1 = posOffset(0, -1, 0, capturePos[1])
-    local pos2 = posOffset(0, -1, 0, capturePos[2])
+    local pos1 = util.posOffset(0, -1, 0, capturePos[1])
+    local pos2 = util.posOffset(0, -1, 0, capturePos[2])
     local data = worldedit.serialize(pos1, pos2)
-    local saved, error = saveBlockZone( data, filename, "exports")
+    local saved, error = util.saveBlockZone( data, filename, "exports")
     if not saved then
       return error
     end
@@ -80,18 +50,30 @@ captureBlockZone = function(filename)
 end
 
 
+--Handle attributes of the board such as positon and status
+----------------------------------------------------
+local getBoardStatus = function()
+  local status = board.status
+  if status then
+    return status
+  else return nil end
+end
 
-getBoardPos = function()
-  local pos = catan_local.boardsettings.pos
+local setBoardStatus = function(status)
+  board.status = status
+end
+
+local getBoardPos = function()
+  local pos = board.pos
   if pos then
     return pos
   else return nil end
 end
 
-setBoardPos = function(pos)
+local setBoardPos = function(pos)
   local status = getBoardStatus()
   if status == "bare" then
-    catan_local.boardsettings.pos = pos
+    board.pos = pos
   elseif status == "preview" then
     return "Board is currently in preview state. '/catan unpreivew' to set new pos."
   else
@@ -100,97 +82,70 @@ setBoardPos = function(pos)
 
 end
 
-getBoardStatus = function()
-  local status = catan_local.boardsettings.status
-  if status then
-    return status
-  else return nil end
-end
 
-setBoardStatus = function(status)
-  catan_local.boardsettings.status = status
-end
-
-setBoardLayout = function(layout)
+--Handle retrieval and setting of board settings (layout, style, etc)
+----------------------------------------------------
+local setBoardLayout = function(layout)
   local status = getBoardStatus()
   if status ~= "created" then
-    catan_local.boardsettings.layout = layout
+    board.settings.layout = layout
   else
     return "Cannot set board layout, board is already created."
   end
 end
 
-getBoardLayout = function()
-  return catan_local.boardsettings.layout
+local getBoardLayout = function()
+  return board.settings.layout
 end
 
-setBoardStyle = function(style)
+local setBoardStyle = function(style)
   local status = getBoardStatus()
   if status ~= "created" then
-    catan_local.boardsettings.style = style
+    board.settings.style = style
   else
     return "Cannot set board style, board is already created."
   end
  end
 
-getBoardStyle = function()
-  return catan_local.boardsettings.style
+local getBoardStyle = function()
+  return board.settings.style
 end
 
-setBoardNumberLayout = function(layout)
+local setBoardNumberLayout = function(layout)
   local status = getBoardStatus()
   if status ~= "created" then
-    catan_local.boardsettings.number_layout = layout
+    board.settings.numberLayout = layout
   else
     return "Cannot set board number layout, board is already created."
   end
 end
 
-getBoardNumberLayout = function()
-  return catan_local.boardsettings.number_layout
+local getBoardNumberLayout = function()
+  return board.settings.numberLayout
 end
 
-setBoardGametype = function(type)
+local setBoardGameType = function(type)
   local status = getBoardStatus()
   if status ~= "created" then
-      catan_local.boardsettings.game_type = type
+      board.settings.gameType = type
   else
     return "Cannot set board gametype, board is already created."
   end
 end
 
-getBoardGametype = function()
-  return catan_local.boardsettings.game_type
+local getBoardGameType = function()
+  return board.settings.gameType
 end
 
-catan_local.boardsettings.preview = false
-catan_local.boardsettings.created = false
-
--- local functions
-local isBoardCreated = function()
-  return catan_local.boardsettings.created
-end
-
-local isBoardPreview = function()
-  return catan_local.boardsettings.preview
-end
+--Generate Board
+----------------------------------------------------
 
 local generate_board = function()
   local seed = os.time()
   math.randomseed(seed)
 
-  local board = {}
   board.tiles = {}
   board.harbors = {}
-  board.settings = {}
-
-  --board settings
-  board.settings.layout = getBoardLayout()
-  board.settings.style = getBoardStyle()
-  board.settings.numberLayout = getBoardNumberLayout()
-  board.settings.gametype = getBoardGametype()
-
-
 
   --generate tiles
   if board.settings.layout == "random" then
@@ -280,32 +235,35 @@ local generate_board = function()
   return board
 end
 
+
+--Functions that display specific aspects of the board
+----------------------------------------------------
 local display_tile = function(tile, style)
-  local pos = tile.tilecenter
+  local pos = tile.tileCenter
   local colors = {wheat="yellow", wool="green", wood="brown", ore="blue", brick="red", desert="white"}
   local color = colors[tile.type]
 
   if style then
-    local data = loadBlockZone(tile.type, "board_style", style)
-    worldedit.deserialize(posOffset(-6, 0, -7, pos), data)
+    local data = util.loadBlockZone(tile.type, "board_style", style)
+    worldedit.deserialize(util.posOffset(-6, 0, -7, pos), data)
   else
-    worldedit.set(posOffset(-6, 0, -3, pos), posOffset(-6, 0, 3, pos), "wool:"..color)
-    worldedit.set(posOffset(-5, 0, -4, pos), posOffset(-4, 0, 4, pos), "wool:"..color)
-    worldedit.set(posOffset(-3, 0, -5, pos), posOffset(-3, 0, 5, pos), "wool:"..color)
-    worldedit.set(posOffset(-2, 0, -6, pos), posOffset(-1, 0, 6, pos), "wool:"..color)
+    worldedit.set(util.posOffset(-6, 0, -3, pos), util.posOffset(-6, 0, 3, pos), "wool:"..color)
+    worldedit.set(util.posOffset(-5, 0, -4, pos), util.posOffset(-4, 0, 4, pos), "wool:"..color)
+    worldedit.set(util.posOffset(-3, 0, -5, pos), util.posOffset(-3, 0, 5, pos), "wool:"..color)
+    worldedit.set(util.posOffset(-2, 0, -6, pos), util.posOffset(-1, 0, 6, pos), "wool:"..color)
     ----------------------
-    worldedit.set(posOffset(0, 0, -7, pos), posOffset(0, 0, 7, pos), "wool:"..color)
+    worldedit.set(util.posOffset(0, 0, -7, pos), util.posOffset(0, 0, 7, pos), "wool:"..color)
     ----------------------
-    worldedit.set(posOffset(1, 0, -6, pos), posOffset(2, 0, 6, pos), "wool:"..color)
-    worldedit.set(posOffset(3, 0, -5, pos), posOffset(3, 0, 5, pos), "wool:"..color)
-    worldedit.set(posOffset(4, 0, -4, pos), posOffset(5, 0, 4, pos), "wool:"..color)
-    worldedit.set(posOffset(6, 0, -3, pos), posOffset(6, 0, 3, pos), "wool:"..color)
+    worldedit.set(util.posOffset(1, 0, -6, pos), util.posOffset(2, 0, 6, pos), "wool:"..color)
+    worldedit.set(util.posOffset(3, 0, -5, pos), util.posOffset(3, 0, 5, pos), "wool:"..color)
+    worldedit.set(util.posOffset(4, 0, -4, pos), util.posOffset(5, 0, 4, pos), "wool:"..color)
+    worldedit.set(util.posOffset(6, 0, -3, pos), util.posOffset(6, 0, 3, pos), "wool:"..color)
   end
 
 end
 
 local display_number = function (tile, style)
-  local pos = tile.tilecenter
+  local pos = tile.tileCenter
   local number, color1, color2
   if tile.number ~= nil then
     if tile.number < 7 then
@@ -351,7 +309,7 @@ local display_number = function (tile, style)
 end
 
 local display_settlementLocation = function(tile)
-  local pos = tile.tilecenter
+  local pos = tile.tileCenter
   local offsets = {{x = pos.x - 7, y = pos.y, z = pos.z + 4}, {x = pos.x, y = pos.y, z = pos.z + 8}, {x = pos.x + 7, y = pos.y, z = pos.z + 4}, {x = pos.x + 7, y = pos.y, z = pos.z - 4}, {x = pos.x, y = pos.y, z = pos.z - 8}, {x = pos.x - 7, y = pos.y, z = pos.z - 4}}
   for i = 1, 6 do
     local pos = offsets[i]
@@ -367,10 +325,10 @@ local display_settlementLocation = function(tile)
 end
 
 local display_roads = function(tile, style)
-  local pos = tile.tilecenter
+  local pos = tile.tileCenter
   if style then
-    local data = loadBlockZone("road", "board_style", style)
-    worldedit.deserialize(posOffset(-7, 0, -8, pos), data)
+    local data = util.loadBlockZone("road", "board_style", style)
+    worldedit.deserialize(util.posOffset(-7, 0, -8, pos), data)
   else
     local offset_corners = { {{x = pos.x - 7, y = pos.y, z = pos.z - 3}, {x = pos.x - 7, y = pos.y, z = pos.z + 3}}, {{x = pos.x - 6, y = pos.y, z = pos.z + 4}, {x = pos.x - 1, y = pos.y, z = pos.z + 8}}, {{x = pos.x + 1, y = pos.y, z = pos.z + 8}, {x = pos.x + 6, y = pos.y, z = pos.z + 4}}, {{x = pos.x + 7, y = pos.y, z = pos.z - 3}, {x = pos.x + 7, y = pos.y, z = pos.z + 3}}, {{x = pos.x + 1, y = pos.y, z = pos.z - 8}, {x = pos.x + 6, y = pos.y, z = pos.z - 4}}, {{x = pos.x - 1, y = pos.y, z = pos.z - 8}, {x = pos.x - 6, y = pos.y, z = pos.z -4}} }
     for i = 1, 6 do
@@ -381,96 +339,129 @@ local display_roads = function(tile, style)
   end
 end
 
-local setNodeInfoText = function(pos, text)
-
-end
-
 local display_harbors = function(tile, style)
-  local pos = tile.tilecenter
+  local pos = tile.tileCenter
   for i = 1, #tile.settlements do
     if tile.settlements[i].harborGen then
       local harborGen = tile.settlements[i].harborGen
-      local data = loadBlockZone(harborGen.blockZone, "board_style", style)
-      worldedit.deserialize(posOffset(harborGen.xOffset, 0, harborGen.zOffset, pos), data)
+      local data = util.loadBlockZone(harborGen.blockZone, "board_style", style)
+      worldedit.deserialize(util.posOffset(harborGen.xOffset, 0, harborGen.zOffset, pos), data)
     end
   end
 end
 
+--Display the board
+----------------------------------------------------
 local display_board = function(board)
   local boardStyle = board.settings.style
   local offsets = {{x=-28, y=0}, {x=-21, y=12}, {x=-14, y=24}, {x=0, y=24}, {x=14, y=24}, {x=21, y=12}, {x=28, y=0}, {x=21, y=-12}, {x=14, y=-24}, {x=0, y=-24}, {x=-14, y=-24}, {x=-21, y=-12}, {x=-14, y=0}, {x=-7, y=12}, {x=7, y=12}, {x=14, y=0}, {x=7, y=-12}, {x=-7, y=-12}, {x=0, y=0}}
-  local pos = catan_local.boardsettings.pos
+  local pos = getBoardPos()
 
   for i = 19, 1, -1 do
     local offset = offsets[i]
     local tile = board.tiles[i]
-    tile.tilecenter = {x = pos.x + offset.x, y = pos.y, z = pos.z + offset.y}
+    tile.tileCenter = {x = pos.x + offset.x, y = pos.y, z = pos.z + offset.y}
     display_tile(tile, boardStyle)
     display_number(tile, boardStyle)
     display_settlementLocation(tile)
     display_harbors(tile, boardStyle)
     display_roads(tile, boardStyle)
   end
-
 end
 
-
-catan_local.functions.setboardpos = function(pos)
-  setBoardPos(pos)
-
-end
-
-catan_local.functions.removeboardpos = function()
-  setBoardPos()
-end
-
-catan_local.functions.previewboardarea = function()
-  if catan_local.boardsettings.pos then
-    local pos = catan_local.boardsettings.pos
-    minetest.chat_send_all(catan_local.modchatprepend.."Previewing the board area.")
-    minetest.chat_send_all(catan_local.modchatprepend.."You may not be able to move. Use command '/c:board-unpreview' to unpreview the area.")
-    minetest.chat_send_all(catan_local.modchatprepend.."If you like the area, use command '/c:board'")
-    worldedit.hide({x=pos.x - xsize/2, y=pos.y + 1, z=pos.z - zsize/2}, {x=pos.x + xsize/2, y=pos.y + ysize, z=pos.z+zsize/2})
-    catan_local.boardsettings.preview = true
-    setBoardStatus("preview")
-  else
-    minetest.chat_send_all(catan_local.modchatprepend.."ERROR: Cannot prieview the board area -- no pos is set. Set the position by placing the special block or command '/c:board-setpos' to set to current position.")
-  end
-
-end
-
-catan_local.functions.unpreviewboardarea = function()
-  if catan_local.boardsettings.pos and isBoardPreview() then
-    local pos = catan_local.boardsettings.pos
-    minetest.chat_send_all(catan_local.modchatprepend.."Unpreviewing the board area.")
-    worldedit.restore({x=pos.x - xsize/2 , y=pos.y + 1, z=pos.z - zsize/2}, {x=pos.x + xsize/2, y=pos.y + ysize, z=pos.z+zsize/2})
-    catan_local.boardsettings.preview = false
-    setBoardStatus("bare")
-  else
-    minetest.chat_send_all(catan_local.modchatprepend.."ERROR: Cannot unprieview the board area -- no pos is set or there is no board in preview.")
-  end
-end
-
-catan_local.functions.makeboard = function()
+local makeBoard = function()
   local status = getBoardStatus()
   local pos = getBoardPos()
-  if status ~= "created" then
-    if pos then
+  if pos and status ~= "created" then
       minetest.debug("Creating bord, clearing objects")
       minetest.chat_send_all(catan_local.modchatprepend.."Making board...please wait.")
-      worldedit.restore({x=pos.x - xsize/2 , y=pos.y + 1, z=pos.z - zsize/2}, {x=pos.x + xsize/2, y=pos.y + ysize, z=pos.z+zsize/2})
-      worldedit.set({x=pos.x - xsize/2 , y=pos.y, z=pos.z - zsize/2}, {x=pos.x + xsize/2, y=pos.y + ysize, z=pos.z+zsize/2}, "air")
+      worldedit.restore(util.posOffset( -(xSize/2), 1, -(zSize/2), pos) , util.posOffset(xSize/2, ySize, zSize/2, pos))
+      worldedit.set(util.posOffset( -(xSize/2), 1, -(zSize/2), pos) , util.posOffset(xSize/2, ySize, zSize/2, pos), "air")
 
-      worldedit.set({x=pos.x - xsize/2 , y=pos.y-1, z=pos.z - zsize/2}, {x=pos.x + xsize/2, y=pos.y, z=pos.z+zsize/2}, "catan:board_placeholder")
+      worldedit.set(util.posOffset( -(xSize/2), 0, -(zSize/2), pos) , util.posOffset(xSize/2, 0, zSize/2, pos), "catan:board_placeholder")
       --worldedit.set({x=pos.x, y=pos.y, z=pos.z}, {x=pos.x, y=pos.y + 5, z=pos.z}, "wool:blue")
       local board = generate_board()
       display_board(board)
+      worldedit.replace(util.posOffset( -(xSize/2), 0, -(zSize/2), pos) , util.posOffset(xSize/2, 0, zSize/2, pos), "catan:board_placeholder", "default:water_source")
       setBoardStatus("created")
-      worldedit.replace({x=pos.x - xsize/2 , y=pos.y-1, z=pos.z - zsize/2}, {x=pos.x + xsize/2, y=pos.y, z=pos.z+zsize/2}, "catan:board_placeholder", "default:water_source")
-    else
-      return "Cannot create board. Set to current pos with '/board set pos' "
-    end
-  else
+  elseif pos then
     return "Cannot create board, board is already created."
+  else
+    return "Cannot create board. Set to current pos with '/board set pos' "
   end
+end
+
+
+--Handle previewing of the board area
+----------------------------------------------------
+local previewBoardArea = function()
+  local pos = getBoardPos()
+  local status = getBoardStatus()
+  if pos and status ~= "created" then
+    minetest.chat_send_all(catan_local.modchatprepend.."Previewing the board area.")
+    minetest.chat_send_all(catan_local.modchatprepend.."You may not be able to move. Use command '/board unpreview' to unpreview the area.")
+    minetest.chat_send_all(catan_local.modchatprepend.."If you like the area, use command '/board create'")
+    worldedit.hide( util.posOffset( -(xSize/2), 0, -(zSize/2), pos), util.posOffset(xSize/2, ySize, zSize/2, pos) )
+    setBoardStatus("preview")
+  elseif pos then
+    return "ERROR: Cannot prieview the board area -- no pos is set. Set the position by placing the special block or command '/board set pos' to set to current position."
+  else
+    return "ERROR: Board is already created. Cannot preview board area."
+  end
+end
+
+local unPreviewBoardArea = function()
+  local pos = getBoardPos()
+  local status = getBoardStatus()
+  if pos and status == "preview" then
+    minetest.chat_send_all(catan_local.modchatprepend.."Unpreviewing the board area.")
+    worldedit.restore(util.posOffset( -(xSize/2), 0, -(zSize/2), pos) , util.posOffset(xSize/2, ySize, zSize/2, pos))
+    setBoardStatus("bare")
+  elseif pos then
+    return "ERROR: Board is not in preview state. Cannot unpreview."
+  else
+    return "ERROR: Board pos is not set."
+  end
+end
+
+
+--local api wrapper functions
+boardSetup.setBoardPos = function(pos)
+  return setBoardPos(pos)
+end
+
+boardSetup.setBoardLayout = function(layout)
+  return setBoardLayout(layout)
+end
+
+boardSetup.setBoardStyle = function(style)
+  return setBoardStyle(style)
+end
+
+boardSetup.setBoardNumberLayout = function(layout)
+  return setBoardNumberLayout(layout)
+end
+
+boardSetup.setBoardGameType = function(type)
+  return setBoardGameType(type)
+end
+
+boardSetup.previewBoardArea = function()
+  return previewBoardArea()
+end
+
+boardSetup.unPreviewBoardArea = function()
+  return unPreviewBoardArea()
+end
+
+boardSetup.makeBoard = function()
+  return makeBoard()
+end
+
+boardSetup.captureBlockZone = function(filename)
+  return captureBlockZone(filename)
+end
+
+boardSetup.setCapturePos = function(pos, posNum)
+  return setCapturePos(pos, posNum)
 end

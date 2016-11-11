@@ -1,4 +1,5 @@
 local catan_local = ...
+local boardSetup = catan_local.api.boardSetup
 
 minetest.register_privilege("catan_admin", {
 	description = "Admin commands for Catan plugin.",
@@ -11,39 +12,28 @@ ChatCmdBuilder.new("board", function(cmd)
 	end)
 
 	cmd:sub("preview", function(name)
+		local error = boardSetup.previewBoardArea()
 		local player = minetest.get_player_by_name(name)
-		local pos = getBoardPos()
-		local status = getBoardStatus()
-		if status == "bare" then
-			if pos then
-				catan_local.functions.previewboardarea(pos)
-				return true, "Previewing board area. Use '/catan unpreview' to undo."
-			else
-				pos = player.getpos(player)
-				catan_local.functions.previewboardarea(pos)
-				return true, "Previewing board area. Use '/catan unpreview' to undo."
-			end
-		elseif status == "preview" then
-			return false, "Board is already in preview state."
+		if not error then
+			return true, "Previewed the board area."
 		else
-			return false, "Board is currently created."
+			return false, error
 		end
 	end)
 
 	cmd:sub("unpreview", function(name)
-		local status = getBoardStatus()
-		if status == "preview" then
-			catan_local.functions.unpreviewboardarea()
-			return true, "Board area unpreviewed."
+		local error = boardSetup.unPreviewBoardArea()
+		if not error then
+			return true, "Unpreviewed the board area."
 		else
-			return false, "Board area is not in preview state."
+			return false, error
 		end
 	end)
 
 	cmd:sub("set pos", function(name)
 		local player = minetest.get_player_by_name(name)
 		local pos = player.getpos(player)
-		local error = setBoardPos(pos)
+		local error = boardSetup.setBoardPos(pos)
 		if not error then
 			return true, "Set board center to current player "..name.." location at "
 		else
@@ -52,7 +42,7 @@ ChatCmdBuilder.new("board", function(cmd)
 	end)
 
 	cmd:sub("set pos :pos:pos", function(name, pos)
-		local error = setBoardPos(pos)
+		local error = boardSetup.setBoardPos(pos)
 		if not error then
 			return true, "Board pos set to "
 		else
@@ -61,7 +51,7 @@ ChatCmdBuilder.new("board", function(cmd)
 	end)
 
 	cmd:sub("remove pos", function(name)
-		local error = setBoardPos(pos)
+		local error = boardSetup.setBoardPos(pos)
 		if not error then
 			return true, "Board pos removed."
 		else
@@ -70,7 +60,7 @@ ChatCmdBuilder.new("board", function(cmd)
 	end)
 
 	cmd:sub("set layout :layout:word", function(name, layout)
-		local error = setBoardLayout(layout)
+		local error = boardSetup.setBoardLayout(layout)
 		if not error then
 			return true, "Board layout set to "..layout
 		else
@@ -79,7 +69,7 @@ ChatCmdBuilder.new("board", function(cmd)
 	end)
 
 	cmd:sub("set style :style:word", function(name, style)
-		local error = setBoardStyle(style)
+		local error = boardSetup.setBoardStyle(style)
 		if not error then
 			return true, "Board style set to "..style
 		else
@@ -88,7 +78,7 @@ ChatCmdBuilder.new("board", function(cmd)
 	end)
 
 	cmd:sub("set number layout :layout:word", function(name, layout)
-		local error = setBoardNumberLayout(layout)
+		local error = boardSetup.setBoardNumberLayout(layout)
 		if not error then
 			return true, "Board number layout set to "..layout
 		else
@@ -97,7 +87,7 @@ ChatCmdBuilder.new("board", function(cmd)
 	end)
 
 	cmd:sub("set game type :type:word", function(name, type)
-		local error = setBoardGametype(type)
+		local error = boardSetup.setBoardGametype(type)
 		if not error then
 			return true, "Board gametype set to "..type
 		else
@@ -106,7 +96,7 @@ ChatCmdBuilder.new("board", function(cmd)
 	end)
 
 	cmd:sub("create", function(name)
-		local error = catan_local.functions.makeboard()
+		local error = boardSetup.makeBoard()
 		if not error then
 			return true, "Board created. /catan start to begin."
 		else
@@ -124,7 +114,7 @@ end, {
 ChatCmdBuilder.new("catandev", function(cmd)
 
 	cmd:sub("capture :filename", function(name, filename)
-		local error = captureBlockZone(filename)
+		local error = boardSetup.captureBlockZone(filename)
 		if error then
 			return false, error
 		else

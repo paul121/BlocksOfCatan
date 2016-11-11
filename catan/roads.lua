@@ -1,4 +1,16 @@
 local catan_local = ...
+local util = catan_local.util
+
+catan_local.api.roadControl = {}
+local roadControl = catan_local.api.roadControl
+
+
+----------------------------------------------------
+--LOCAL FUNCTIONS
+----------------------------------------------------
+
+--
+----------------------------------------------------
 
 local convertToRoad = function(pos)
   worldedit.set(pos, pos, "catan:road_red")
@@ -26,10 +38,10 @@ local testLocation = function(pos)
 end
 
 searchForRoad = function(pos)
-  testLocation(posOffset(1, 0, 0, pos))
-  testLocation(posOffset(-1, 0, 0, pos))
-  testLocation(posOffset(0, 0, 1, pos))
-  testLocation(posOffset(0, 0, -1, pos))
+  testLocation(util.posOffset(1, 0, 0, pos))
+  testLocation(util.posOffset(-1, 0, 0, pos))
+  testLocation(util.posOffset(0, 0, 1, pos))
+  testLocation(util.posOffset(0, 0, -1, pos))
 end
 
 local buildRoad = function(player, pos)
@@ -38,7 +50,7 @@ local buildRoad = function(player, pos)
 end
 
 local isRoadLocation = function(pos)
-  local centerPos = catan_local.boardsettings.pos
+  local centerPos = catan_local.board.pos
   local differenceVector = {x = centerPos.x - pos.x, y = centerPos.y - pos.y, z = centerPos.z - pos.z}
   --minetest.chat_send_all("Checking if pos is a road...")
   if ((differenceVector.z % 8 == 0) and ((differenceVector.x % 14 == 1) or (differenceVector.x % 14 == 13))) or
@@ -53,8 +65,15 @@ local isRoadLocation = function(pos)
   end
 end
 
-catan_local.functions.roadBuilderPlace = function(player, pos)
+local onRoadBuilderPlace = function(player, pos)
   if isRoadLocation(pos) then
     buildRoad(player, pos)
   end
+end
+
+----------------------------------------------------
+--LOCAL API FUNCTIONS
+----------------------------------------------------
+roadControl.onRoadBuilderPlace = function(player, pos)
+  return onRoadBuilderPlace(player, pos)
 end

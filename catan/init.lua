@@ -1,4 +1,8 @@
+catan = {}
 local catan_local = {}
+catan_local.api = {}
+catan_local.board = {}
+
 catan_local.modchatprepend = "CatanMod: "
 
 catan_local.xsize = 86
@@ -32,7 +36,8 @@ loadmodule(worldeditpath .. "/compatibility.lua")
 
 dofile(modpath.."/chatcmdbuilder/chatcmdbuilder.lua")
 
-assert(loadfile(minetest.get_modpath(minetest.get_current_modname()) .. "/nodes.lua"))(catan_local)
-assert(loadfile(minetest.get_modpath(minetest.get_current_modname()) .. "/commands.lua"))(catan_local)
+assert(loadfile(minetest.get_modpath(minetest.get_current_modname()) .. "/util.lua"))(catan_local)
 assert(loadfile(minetest.get_modpath(minetest.get_current_modname()) .. "/boardsetup.lua"))(catan_local)
 assert(loadfile(minetest.get_modpath(minetest.get_current_modname()) .. "/roads.lua"))(catan_local)
+assert(loadfile(minetest.get_modpath(minetest.get_current_modname()) .. "/nodes.lua"))(catan_local)
+assert(loadfile(minetest.get_modpath(minetest.get_current_modname()) .. "/commands.lua"))(catan_local)

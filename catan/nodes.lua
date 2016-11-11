@@ -1,18 +1,17 @@
 local catan_local = ...
 
+local boardSetup = catan_local.api.boardSetup
+local roadControl = catan_local.api.roadControl
+
 minetest.register_node("catan:board_center", {
 	description = "Block for previewing catan board",
 	is_ground_content = true,
 	groups = {crumbly=3},
-  after_place_node = function(pos, placer, itemstack, pointed_thing) setBoardPos(pos) end,
+  after_place_node = function(pos, placer, itemstack, pointed_thing) boardSetup.setBoardPos(pos) end,
 	on_rightclick = function(pos, node, player, pointed_thing)
-		if catan_local.boardsettings.preview then
-			catan_local.functions.unpreviewboardarea()
-		else
-			catan_local.functions.previewboardarea()
-		end
+		boardSetup.previewBoardArea()
 	end,
-  after_dig_node = function(pos, oldnode, oldmetadata, digger) setBoardPos() end
+  after_dig_node = function(pos, oldnode, oldmetadata, digger) boardSetup.setBoardPos() end
 })
 
 minetest.register_node("catan:board_placeholder", {
@@ -28,10 +27,7 @@ minetest.register_node("catan:capture_pos1", {
 	tiles = {"default_diamond_block.png"},
 	is_ground_content = true,
 	groups = {crumbly=3},
-  after_place_node = function(pos, placer, itemstack, pointed_thing) setCapturePos(pos, 1) end,
-	on_rightclick = function(pos, node, player, pointed_thing)
-		captureBlockZone()
-	end
+  after_place_node = function(pos, placer, itemstack, pointed_thing) boardSetup.setCapturePos(pos, 1) end
 })
 
 minetest.register_node("catan:capture_pos2", {
@@ -39,10 +35,7 @@ minetest.register_node("catan:capture_pos2", {
 	tiles = {"default_gold_block.png"},
 	is_ground_content = true,
 	groups = {crumbly=3},
-  after_place_node = function(pos, placer, itemstack, pointed_thing) setCapturePos(pos, 2) end,
-	on_rightclick = function(pos, node, player, pointed_thing)
-		captureBlockZone()
-	end
+  after_place_node = function(pos, placer, itemstack, pointed_thing) boardSetup.setCapturePos(pos, 2) end
 })
 
 minetest.register_node("catan:settlement_location", {
@@ -70,5 +63,5 @@ minetest.register_node("catan:road_builder", {
 	description = "Road builder block",
 	tiles = {"wool_orange.png"},
 	groups = {crumbly=3},
-	after_place_node = function(pos, player, itemstack, pointed_thing) catan_local.functions.roadBuilderPlace(player, pos) end
+	after_place_node = function(pos, player, itemstack, pointed_thing) roadControl.onRoadBuilderPlace(player, pos) end
 })
