@@ -16,11 +16,6 @@ local convertToRoad = function(pos)
   worldedit.set(pos, pos, "catan:road_red")
 end
 
-local getNodeType = function(pos)
-  local node = minetest.get_node(pos)
-  return node.name
-end
-
 local addRoadToSettlement = function(pos)
   minetest.chat_send_all("Adding a road to settlement.")
 end
@@ -28,7 +23,7 @@ end
 local searchForRoad = nil
 
 local testLocation = function(pos)
-  local nodeType = getNodeType(pos)
+  local nodeType = util.getNodeType(pos)
   if nodeType == "catan:road_default" then
     convertToRoad(pos)
     searchForRoad(pos)

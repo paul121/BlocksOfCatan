@@ -5,6 +5,11 @@ local util = catan_local.api.util
 
 local worldpath = minetest.get_worldpath()
 
+util.getNodeType = function(pos)
+  local node = minetest.get_node(pos)
+  return node.name
+end
+
 util.posOffset = function(x, y, z, pos)
   if x == nil then
     x = 0
