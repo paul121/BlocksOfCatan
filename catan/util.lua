@@ -36,7 +36,7 @@ util.loadBoard = function()
     local data = file:read("*all")
     return minetest.deserialize(data)
   else
-    minetest.log("ERROR: Could not open file to read ccatanboard.txt: "..error)
+    minetest.log("ERROR: Could not open file to read catanboard.txt: "..error)
   end
 end
 

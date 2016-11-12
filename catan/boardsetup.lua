@@ -17,6 +17,8 @@ local loadBoard = function(savedBoard)
     defaultBoard.settings.layout = "random"
     defaultBoard.settings.style = "default"
     defaultBoard.settings.numberLayout = "random"
+    defaultBoard.players = {}
+    defaultBoard.playerMap = {}
     defaultBoard.generated = false
     defaultBoard.status = "bare"
     defaultBoard.created = false
@@ -445,6 +447,10 @@ end
 
 
 --local api wrapper functions
+boardSetup.getBoardStatus = function()
+  return getBoardStatus()
+end
+
 boardSetup.setBoardPos = function(pos)
   return setBoardPos(pos)
 end
@@ -496,4 +502,8 @@ boardSetup.loadBoard = function(data)
   end
   catan_local.board = savedBoard
   board = catan_local.board
+end
+
+boardSetup.getBoard = function()
+  return board
 end

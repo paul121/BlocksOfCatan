@@ -8,9 +8,19 @@ minetest.register_privilege("catan_admin", {
 	give_to_singleplayer = true
 })
 
+minetest.register_privilege("catan_player", {
+	description = "Player commands for Catan plugin.",
+	give_to_singleplayer = true
+})
+
+minetest.register_privilege("catan_viewer", {
+	description = "Viewer commands for Catan plugin.",
+	give_to_singleplayer = true
+})
+
 ChatCmdBuilder.new("board", function(cmd)
 	cmd:sub("init", function(name, type)
-		
+
 	end)
 
 	cmd:sub("preview", function(name)
