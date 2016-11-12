@@ -1,5 +1,5 @@
 local catan_local = ...
-local util = catan_local.util
+local util = catan_local.api.util
 
 catan_local.api.roadControl = {}
 local roadControl = catan_local.api.roadControl

@@ -1,27 +1,33 @@
 --
 local catan_local = ...
-local util = catan_local.util
+local util = catan_local.api.util
 local board = catan_local.board
 
 --create boardSetup
 catan_local.api.boardSetup = {}
 local boardSetup = catan_local.api.boardSetup
 
-board.settings = {}
-board.settings.gameType = "default"
-board.settings.layout = "random"
-board.settings.style = "default"
-board.settings.numberLayout = "random"
-board.status = "bare"
-board.pos = nil
+local loadBoard = function(savedBoard)
+  if savedBoard then
+    return savedBoard
+  else
+    local defaultBoard = {}
+    defaultBoard.settings = {}
+    defaultBoard.settings.gameType = "default"
+    defaultBoard.settings.layout = "random"
+    defaultBoard.settings.style = "default"
+    defaultBoard.settings.numberLayout = "random"
+    defaultBoard.generated = false
+    defaultBoard.status = "bare"
+    defaultBoard.created = false
+    defaultBoard.pos = nil
 
-board.xSize = 86
-board.ySize = 20
-board.zSize = 80
-
-local xSize = board.xSize
-local ySize = board.ySize
-local zSize = board.zSize
+    defaultBoard.xSize = 86
+    defaultBoard.ySize = 20
+    defaultBoard.zSize = 80
+    return defaultBoard
+  end
+end
 
 ----------------------------------------------------
 --LOCAL FUNCTIONS
@@ -232,6 +238,7 @@ local generate_board = function()
     minetest.chat_send_all(catan_local.modchatprepend.."Tile: "..i.." is of type "..board.tiles[i].type.." with dice number "..tostring(board.tiles[i].number).."!")
   end
 
+  board.created = true
   return board
 end
 
@@ -370,6 +377,9 @@ local display_board = function(board)
 end
 
 local makeBoard = function()
+  local xSize = board.xSize
+  local ySize = board.ySize
+  local zSize = board.zSize
   local status = getBoardStatus()
   local pos = getBoardPos()
   if pos and status ~= "created" then
@@ -380,10 +390,13 @@ local makeBoard = function()
 
       worldedit.set(util.posOffset( -(xSize/2), 0, -(zSize/2), pos) , util.posOffset(xSize/2, 0, zSize/2, pos), "catan:board_placeholder")
       --worldedit.set({x=pos.x, y=pos.y, z=pos.z}, {x=pos.x, y=pos.y + 5, z=pos.z}, "wool:blue")
-      local board = generate_board()
+      if not board.created then
+        board = generate_board()
+      end
       display_board(board)
       worldedit.replace(util.posOffset( -(xSize/2), 0, -(zSize/2), pos) , util.posOffset(xSize/2, 0, zSize/2, pos), "catan:board_placeholder", "default:water_source")
       setBoardStatus("created")
+      util.saveBoard()
   elseif pos then
     return "Cannot create board, board is already created."
   else
@@ -395,6 +408,9 @@ end
 --Handle previewing of the board area
 ----------------------------------------------------
 local previewBoardArea = function()
+  local xSize = board.xSize
+  local ySize = board.ySize
+  local zSize = board.zSize
   local pos = getBoardPos()
   local status = getBoardStatus()
   if pos and status ~= "created" then
@@ -411,6 +427,9 @@ local previewBoardArea = function()
 end
 
 local unPreviewBoardArea = function()
+  local xSize = board.xSize
+  local ySize = board.ySize
+  local zSize = board.zSize
   local pos = getBoardPos()
   local status = getBoardStatus()
   if pos and status == "preview" then
@@ -464,4 +483,17 @@ end
 
 boardSetup.setCapturePos = function(pos, posNum)
   return setCapturePos(pos, posNum)
+end
+
+boardSetup.loadBoard = function(data)
+  local savedBoard = nil
+  if data then
+    minetest.chat_send_all("Found existing game board.")
+    savedBoard = data
+  else
+    minetest.chat_send_all("Board init as default")
+    savedBoard = loadBoard()
+  end
+  catan_local.board = savedBoard
+  board = catan_local.board
 end

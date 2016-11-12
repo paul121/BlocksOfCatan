@@ -1,7 +1,9 @@
 local catan_local = ...
-catan_local.util = {}
 
-local util = catan_local.util
+catan_local.api.util = {}
+local util = catan_local.api.util
+
+local worldpath = minetest.get_worldpath()
 
 util.posOffset = function(x, y, z, pos)
   if x == nil then
@@ -17,24 +19,24 @@ util.posOffset = function(x, y, z, pos)
 end
 
 --BOARD SETTINGS
-util.saveBoardSettings = function(data)
-  local file = io.open(minetest.get_worldpath().."/catan/boardSettings.txt")
-  if file then
-    local data = file:write(data)
+util.saveBoard = function()
+  local data = catan_local.board
+  local file, error = io.open(worldpath.."/catanboard.txt", "w")
+  if not error then
+    file:write(minetest.serialize(data))
     file:close()
-    return true
   else
-    return false, "Could not open file to save boardSettings.txt "
+    return "ERROR: Could not save to file catanbaord.txt: "..error
   end
 end
 
-util.loadBoardSettings = function()
-  local file = io.open(minetest.get_worldpath().."/catan/boardSettings.txt")
-  if file then
+util.loadBoard = function()
+  local file, error = io.open(worldpath.."/catanboard.txt", "r")
+  if not error then
     local data = file:read("*all")
-    return data
+    return minetest.deserialize(data)
   else
-    return false, "Could not open file to read boardSettings.txt from"
+    minetest.log("ERROR: Could not open file to read ccatanboard.txt: "..error)
   end
 end
 

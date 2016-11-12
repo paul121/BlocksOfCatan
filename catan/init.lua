@@ -5,13 +5,8 @@ catan_local.board = {}
 
 catan_local.modchatprepend = "CatanMod: "
 
-catan_local.xsize = 86
-catan_local.ysize = 20
-catan_local.zsize = 80
-
-catan_local.functions = {}
-
 local modpath = minetest.get_modpath(minetest.get_current_modname())
+catan_local.singleplayer = minetest.is_singleplayer()
 
 minetest.log("info", "Catan for minetest is starting up.")
 minetest.debug("Catan for Minetest is starting up.")
@@ -39,5 +34,6 @@ dofile(modpath.."/chatcmdbuilder/chatcmdbuilder.lua")
 assert(loadfile(minetest.get_modpath(minetest.get_current_modname()) .. "/util.lua"))(catan_local)
 assert(loadfile(minetest.get_modpath(minetest.get_current_modname()) .. "/boardsetup.lua"))(catan_local)
 assert(loadfile(minetest.get_modpath(minetest.get_current_modname()) .. "/roads.lua"))(catan_local)
+assert(loadfile(minetest.get_modpath(minetest.get_current_modname()) .. "/player.lua"))(catan_local)
 assert(loadfile(minetest.get_modpath(minetest.get_current_modname()) .. "/nodes.lua"))(catan_local)
 assert(loadfile(minetest.get_modpath(minetest.get_current_modname()) .. "/commands.lua"))(catan_local)

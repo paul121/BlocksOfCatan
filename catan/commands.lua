@@ -1,5 +1,7 @@
 local catan_local = ...
 local boardSetup = catan_local.api.boardSetup
+local util = catan_local.api.util
+local playerControl = catan_local.api.playerControl
 
 minetest.register_privilege("catan_admin", {
 	description = "Admin commands for Catan plugin.",
@@ -8,7 +10,7 @@ minetest.register_privilege("catan_admin", {
 
 ChatCmdBuilder.new("board", function(cmd)
 	cmd:sub("init", function(name, type)
-		catan_local.functions.start(name)
+		
 	end)
 
 	cmd:sub("preview", function(name)
@@ -104,6 +106,15 @@ ChatCmdBuilder.new("board", function(cmd)
 		end
 	end)
 
+	cmd:sub("reset", function(name)
+		local error = boardSetup.resetBoard()
+		if not error then
+			return true, "Board reset"
+		else
+			return false, error
+		end
+	end)
+
 end, {
 	description = "Catan board admin tools",
 	privs = {
@@ -128,16 +139,3 @@ end, {
 		catan_admin = true
 	}
 })
-
-
-catan_local.functions.start = function(name)
-  minetest.debug(name .. " started the Catan mod.")
-  minetest.chat_send_all(catan_local.modchatprepend..name .. " started the Catan mod.")
-
-  local inv = minetest.get_inventory({type="player", name=name})
-  local stack = ItemStack("catan:board_center 2")
-  local list = { ItemStack("catan:board_center 2"), ItemStack("catan:road_builder 20"), ItemStack("catan:capture_pos1 1"), ItemStack("catan:capture_pos2 1"), ItemStack("catan:road_default 1") }
-
-  inv:set_list("main", list)
-  minetest.get_player_by_name(name)
-end
