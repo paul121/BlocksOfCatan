@@ -505,5 +505,10 @@ boardSetup.loadBoard = function(data)
 end
 
 boardSetup.getBoard = function()
-  return board
+  return catan_local.board
+end
+
+boardSetup.saveBoard = function(newBoard)
+  catan_local.board = newBoard
+  board = newBoard
 end

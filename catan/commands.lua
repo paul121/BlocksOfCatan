@@ -18,6 +18,25 @@ minetest.register_privilege("catan_viewer", {
 	give_to_singleplayer = true
 })
 
+ChatCmdBuilder.new("player", function(cmd)
+
+	cmd:sub("set color :color", function(name, color)
+		local error = playerControl.setPlayerColor(name, color)
+		if error then
+			return false, error
+		else
+			return true, "Set "..name.."'s color to "..color
+		end
+	end)
+
+end, {
+	description = "Catan player tools",
+	privs = {
+		catan_player = true
+	}
+})
+
+
 ChatCmdBuilder.new("board", function(cmd)
 	cmd:sub("init", function(name, type)
 
