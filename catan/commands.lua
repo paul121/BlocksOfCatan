@@ -161,6 +161,15 @@ ChatCmdBuilder.new("catandev", function(cmd)
 			return true, "Block zone saved to file "..filename..".txt"
 		end
 	end)
+	
+	cmd:sub("reload", function(name)
+		local error = catan_local.reload()
+		if error then
+			return false, error
+		else
+			return true, "Catan mod files reloaded"
+		end
+	end)
 
 end, {
 	description = "Catan board admin tools",
