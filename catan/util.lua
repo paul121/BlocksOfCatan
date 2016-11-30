@@ -30,6 +30,7 @@ util.saveBoard = function()
   if not error then
     file:write(minetest.serialize(data))
     file:close()
+    minetest.log("Board written")
   else
     return "ERROR: Could not save to file catanbaord.txt: "..error
   end
