@@ -329,6 +329,7 @@ local display_settlementLocation = function(tile)
     currentNode = minetest.get_node(pos)
     tile.settlements[i].node = currentNode
     tile.settlements[i].pos = pos
+    tile.settlements[i].owner = nil
 
   end
 end
@@ -511,4 +512,5 @@ end
 boardSetup.saveBoard = function(newBoard)
   catan_local.board = newBoard
   board = newBoard
+  util.saveBoard()
 end
