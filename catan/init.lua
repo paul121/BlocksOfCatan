@@ -31,6 +31,7 @@ loadmodule(worldeditpath .. "/compatibility.lua")
 
 dofile(modpath.."/chatcmdbuilder/chatcmdbuilder.lua")
 
+
 assert(loadfile(minetest.get_modpath(minetest.get_current_modname()) .. "/util.lua"))(catan_local)
 assert(loadfile(minetest.get_modpath(minetest.get_current_modname()) .. "/boardsetup.lua"))(catan_local)
 assert(loadfile(minetest.get_modpath(minetest.get_current_modname()) .. "/roads.lua"))(catan_local)
@@ -39,3 +40,26 @@ assert(loadfile(minetest.get_modpath(minetest.get_current_modname()) .. "/player
 assert(loadfile(minetest.get_modpath(minetest.get_current_modname()) .. "/game.lua"))(catan_local)
 assert(loadfile(minetest.get_modpath(minetest.get_current_modname()) .. "/nodes.lua"))(catan_local)
 assert(loadfile(minetest.get_modpath(minetest.get_current_modname()) .. "/commands.lua"))(catan_local)
+
+local init = function()
+	local board = catan_local.board
+
+	assert(loadfile(modpath .. "/util.lua"))(catan_local)
+	assert(loadfile(modpath .. "/boardsetup.lua"))(catan_local)
+	assert(loadfile(modpath .. "/roads.lua"))(catan_local)
+	assert(loadfile(modpath .. "/settlements.lua"))(catan_local)
+
+ end
+
+ local firstInit = function()
+ 	assert(loadfile(modpath .. "/player.lua"))(catan_local)
+	assert(loadfile(modpath .. "/nodes.lua"))(catan_local)
+	assert(loadfile(modpath .. "/commands.lua"))(catan_local)
+ end
+
+ catan_local.reload = function()
+  init()
+ end
+
+ init()
+ firstInit()
