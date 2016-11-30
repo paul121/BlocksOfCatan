@@ -36,5 +36,6 @@ assert(loadfile(minetest.get_modpath(minetest.get_current_modname()) .. "/boards
 assert(loadfile(minetest.get_modpath(minetest.get_current_modname()) .. "/roads.lua"))(catan_local)
 assert(loadfile(minetest.get_modpath(minetest.get_current_modname()) .. "/settlements.lua"))(catan_local)
 assert(loadfile(minetest.get_modpath(minetest.get_current_modname()) .. "/player.lua"))(catan_local)
+assert(loadfile(minetest.get_modpath(minetest.get_current_modname()) .. "/game.lua"))(catan_local)
 assert(loadfile(minetest.get_modpath(minetest.get_current_modname()) .. "/nodes.lua"))(catan_local)
 assert(loadfile(minetest.get_modpath(minetest.get_current_modname()) .. "/commands.lua"))(catan_local)
