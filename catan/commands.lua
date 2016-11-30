@@ -2,6 +2,7 @@ local catan_local = ...
 local boardSetup = catan_local.api.boardSetup
 local util = catan_local.api.util
 local playerControl = catan_local.api.playerControl
+local gameControl = catan_local.api.gameControl
 
 minetest.register_privilege("catan_admin", {
 	description = "Admin commands for Catan plugin.",
@@ -26,6 +27,24 @@ ChatCmdBuilder.new("player", function(cmd)
 			return false, error
 		else
 			return true, "Set "..name.."'s color to "..color
+		end
+	end)
+
+end, {
+	description = "Catan player tools",
+	privs = {
+		catan_player = true
+	}
+})
+
+ChatCmdBuilder.new("game", function(cmd)
+
+	cmd:sub("start", function(name)
+		local error = gameControl.start(name)
+		if error then
+			return false, error
+		else
+			return true, "Starting the game."
 		end
 	end)
 
@@ -136,7 +155,7 @@ ChatCmdBuilder.new("board", function(cmd)
 	end)
 
 	cmd:sub("reset", function(name)
-		local error = boardSetup.resetBoard()
+		local error = boardSetup.loadBoard()
 		if not error then
 			return true, "Board reset"
 		else
